@@ -201,3 +201,393 @@
                     </div>
                     <span class="preco-extra">Grátis</span>
                 </label>
+                <div id="area-texto-carta-mao" class="area-mensagem">
+                    <p style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">Digite sua mensagem (Manuscrita):</p>
+                    <textarea id="mensagem-carta-mao" class="msg-box" maxlength="150" placeholder="Ex: Te amo muito! Tenha um bom dia." oninput="contarLetras(this, 'contador-letras-mao')"></textarea>
+                    <div style="text-align: right; font-size: 0.8rem; color: #666; margin-top: 2px;"><span id="contador-letras-mao">0</span>/150</div>
+                </div>
+
+                <label class="opcao-extra">
+                    <div class="texto-extra">
+                        <input type="checkbox" id="check-carta-impressa" class="add-check" value="3.00" data-nome="Bilhete Impresso" onchange="mostrarCampoTexto(this, 'area-texto-carta-impressa', 'mensagem-carta-impressa')">
+                        <span>🖨️ Bilhete Impresso</span>
+                    </div>
+                    <span class="preco-extra">+ R$ 3,00</span>
+                </label>
+                <div id="area-texto-carta-impressa" class="area-mensagem">
+                    <p style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">Digite sua mensagem (Impressa):</p>
+                    <textarea id="mensagem-carta-impressa" class="msg-box" maxlength="150" placeholder="Mensagem para imprimir..." oninput="contarLetras(this, 'contador-letras-impressa')"></textarea>
+                    <div style="text-align: right; font-size: 0.8rem; color: #666; margin-top: 2px;"><span id="contador-letras-impressa">0</span>/150</div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Qual o motivo do presente?</label>
+                <input type="text" id="motivo-compra" placeholder="Ex: Aniversário de Casamento, Dia das Mães...">
+            </div>
+
+            <span class="secao-titulo">👤 Seus Dados (Comprador)</span>
+            <div class="input-group"><label>Seu Nome Completo:</label><input type="text" id="comprador-nome" placeholder="Digite seu nome"></div>
+            <div class="grid-2">
+                <div class="input-group"><label>Seu WhatsApp:</label><input type="tel" id="comprador-zap" placeholder="(00) 00000-0000"></div>
+                <div class="input-group"><label>Seu E-mail:</label><input type="email" id="comprador-email" placeholder="email@exemplo.com"></div>
+            </div>
+
+            <span class="secao-titulo">🎁 Dados de Quem Vai Receber</span>
+            <div class="input-group"><label>Nome Completo da Pessoa:</label><input type="text" id="recebedor-nome" placeholder="Nome de quem vai receber a cesta"></div>
+            <div class="input-group"><label>WhatsApp da Pessoa:</label><input type="tel" id="recebedor-zap" placeholder="(00) 00000-0000"></div>
+
+            <span class="secao-titulo">📅 Agendar Entrega</span>
+            <div class="grid-2">
+                <div class="input-group"><label>Data:</label><input type="date" id="data-entrega"></div>
+                <div class="input-group"><label>Hora:</label><input type="time" id="hora-entrega"></div>
+            </div>
+
+            <span class="secao-titulo">🚚 Endereço de Entrega</span>
+            <div class="cep-wrapper">
+                <input type="text" id="input-cep" placeholder="Insira o CEP de entrega" maxlength="9">
+                <button onclick="buscarEndereco()">OK</button>
+            </div>
+            <a href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" style="font-size: 0.8rem; color: #007bff; text-decoration: none;">Não sei o CEP</a>
+            <span id="msg-frete"></span>
+
+            <div id="endereco-detalhes">
+                <div class="linha-endereco">
+                    <div class="input-group" style="flex: 3;"><label>Rua / Logradouro:</label><input type="text" id="end-rua" placeholder="Rua..."></div>
+                    <div class="input-group" style="flex: 1;"><label>Número:</label><input type="text" id="end-numero" placeholder="Nº"></div>
+                </div>
+                <div class="input-group">
+                    <label>Observações de Entrega (Importante):</label>
+                    <textarea id="end-obs" placeholder="Ex: O interfone está quebrado, favor ligar. / Deixar na portaria. / É no 5º andar, bloco B."></textarea>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <div class="resumo-compra">
+        <div class="linha-total">
+            <span>Total:</span>
+            <span id="valor-total">R$ 0,00</span>
+        </div>
+        <button onclick="abrirResumo()" class="btn-whatsapp">Finalizar Pedido</button>
+    </div>
+
+    <div id="modal-pedido" class="modal-overlay">
+        
+        <div class="modal-content" id="etapa-resumo">
+            <div class="modal-titulo">📝 Conferir Pedido</div>
+            <div id="area-resumo-texto" class="resumo-lista"></div>
+            <div class="botoes-modal">
+                <button class="btn-voltar-modal" onclick="fecharModal()">← Voltar</button>
+                <button class="btn-confirmar-modal" onclick="irParaPagamento()">Ir para Pagamento 💳</button>
+            </div>
+        </div>
+
+        <div class="modal-content" id="etapa-pagamento" style="display: none;">
+            <div class="modal-titulo">🤑 Pagamento</div>
+            <p style="text-align: center; margin-bottom: 15px; color: #666;">Escolha como pagar:</p>
+
+            <label class="opcao-pagamento" onclick="mostrarInfoPagamento('pix')">
+                <input type="radio" name="formaPagamento" value="Pix" checked>
+                <span>💠 <b>PIX</b> (Chave Aleatória/CPF)</span>
+            </label>
+            <div id="info-pix" class="box-pix" style="display: block;">
+                <p style="font-size: 0.9rem;">Copie a chave e pague no seu banco:</p>
+                <div class="chave-pix" id="chave-pix-texto">41 988506306</div> <button class="btn-copiar" onclick="copiarChavePix()">Copiar Chave</button>
+            </div>
+
+            <label class="opcao-pagamento" onclick="mostrarInfoPagamento('picpay')">
+                <input type="radio" name="formaPagamento" value="PicPay">
+                <span>💚 <b>PicPay</b> (Cartão de Crédito / Saldo)</span>
+            </label>
+            <div id="info-picpay" class="box-pix" style="display: none;">
+                <p>Ao finalizar, abriremos o <b>PicPay</b> com o valor exato.</p>
+                <p style="font-size: 0.8rem; color: #25D366;">*Aceita Cartão de Crédito.</p>
+            </div>
+
+            <label class="opcao-pagamento" onclick="mostrarInfoPagamento('stone')">
+                <input type="radio" name="formaPagamento" value="Cartão (Stone)">
+                <span>💳 <b>Cartão Crédito/Débito</b> (Stone)</span>
+            </label>
+            <div id="info-stone" class="box-pix" style="display: none;">
+                <p style="font-size: 0.9rem;"><b>Opção 1:</b> Enviaremos um Link de Pagamento seguro pelo WhatsApp.</p>
+                <hr style="margin: 10px 0; border: 0; border-top: 1px dashed #ccc;">
+                <p style="font-size: 0.9rem;"><b>Opção 2:</b> Se for entrega presencial, levamos a maquininha!</p>
+            </div>
+
+            <div class="botoes-modal">
+                <button class="btn-voltar-modal" onclick="voltarParaResumo()">← Resumo</button>
+                <button class="btn-confirmar-modal" onclick="finalizarCompraReal()">Finalizar Pedido ✅</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURAÇÕES ---
+        const URL_GOOGLE_SHEETS = "https://script.google.com/macros/s/AKfycbwZ9L8MjehFimnW4GaUPc7BfawOxe4ivh__0KYQwrtQwzDHG-Uk30bpYoW0d3gpxkLvSQ/exec"; 
+        const SEU_NUMERO_ZAP = "5541988506306"; 
+        const SEU_USUARIO_PICPAY = "osmorningwish"; 
+
+        function mostrarCampoTexto(checkbox, idDivArea, idInputTexto) {
+            var caixaTexto = document.getElementById(idDivArea);
+            var inputTexto = document.getElementById(idInputTexto);
+            if (checkbox.checked) {
+                caixaTexto.style.display = 'block';
+                inputTexto.focus(); 
+            } else {
+                caixaTexto.style.display = 'none';
+                inputTexto.value = ''; 
+                var contador = caixaTexto.querySelector('span[id^="contador"]');
+                if(contador) contador.innerText = '0';
+            }
+            atualizarTotal();
+        }
+
+        function contarLetras(input, idContador) {
+            var contador = document.getElementById(idContador);
+            var qtd = input.value.length;
+            contador.innerText = qtd;
+            if (qtd === 50 || qtd === 150) { contador.style.color = "red"; contador.style.fontWeight = "bold"; } 
+            else { contador.style.color = "#666"; contador.style.fontWeight = "normal"; }
+        }
+
+        function toggleAvisoFoto() {
+            var checkbox = document.getElementById('check-foto');
+            var aviso = document.getElementById('msg-aviso-foto');
+            if(checkbox.checked) { aviso.style.display = 'block'; } else { aviso.style.display = 'none'; }
+            atualizarTotal();
+        }
+
+        // --- BANCO DE DADOS DAS CESTAS ---
+        const dadosCestas = {
+            "despertar": { 
+                nome: "Cesta Despertar", preco: 89.90, 
+                img: "despertar.jpg", // Nome correto minúsculo
+                itens: ["🫓 Pão de queijo", "🧇 Waffle", "🥖 Pães e Torradas", "🍰 Bolo Caseiro"]
+            },
+            "amanhecer": { 
+                nome: "Cesta Amanhecer", preco: 99.90, 
+                img: "amanhecer.jpg",
+                itens: ["☕ Café Artesanal", "🥖 Pães e Torradas", "🍰 Bolo Caseiro"]
+            }, 
+            "romantica": { 
+                nome: "Cesta Romântica", preco: 149.90, 
+                img: "romantica.jpg",
+                itens: ["🍓 Morangos e Uvas", "🍫 Chocolates Finos", "🍾 Espumante Baby"]
+            },
+            "familia": { 
+                nome: "Cesta Família", preco: 199.90, 
+                img: "familia.jpg",
+                itens: ["🍞 Seleção de Pães", "🧀 Frios Variados", "🍊 Suco de 1 Litro"]
+            }
+        };
+
+        const params = new URLSearchParams(window.location.search);
+        let idAtual = params.get('id') || "despertar";
+        if (!dadosCestas[idAtual]) idAtual = "despertar";
+
+        const produto = dadosCestas[idAtual];
+        let precoBase = produto.preco;
+        let valorFrete = 0;
+        let bairroEncontrado = "";
+
+        // PREENCHE A TELA
+        document.getElementById('nome-produto').innerText = produto.nome;
+        document.getElementById('preco-produto').innerText = precoBase.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        document.getElementById('img-produto').src = produto.img; 
+        
+        // PREENCHE A LISTA DE ITENS
+        const ulItens = document.getElementById('lista-inclusos-ul');
+        ulItens.innerHTML = ""; 
+        if (produto.itens) {
+            produto.itens.forEach(item => {
+                let li = document.createElement('li');
+                li.innerText = item;
+                ulItens.appendChild(li);
+            });
+        }
+
+        atualizarTotal();
+
+        function buscarEndereco() {
+            let cep = document.getElementById('input-cep').value.replace(/\D/g, '');
+            let msg = document.getElementById('msg-frete');
+            let divDetalhes = document.getElementById('endereco-detalhes');
+
+            if (cep.length !== 8) {
+                msg.innerHTML = "<span class='erro'>CEP inválido.</span>";
+                divDetalhes.style.display = 'none'; return;
+            }
+            msg.innerText = "Buscando...";
+            fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.erro) {
+                        msg.innerHTML = "<span class='erro'>CEP não encontrado!</span>";
+                        valorFrete = 0; divDetalhes.style.display = 'none';
+                    } else {
+                        valorFrete = 15.00; 
+                        bairroEncontrado = data.bairro;
+                        document.getElementById('end-rua').value = data.logradouro;
+                        document.getElementById('end-numero').focus();
+                        msg.innerHTML = `<span class='sucesso'>Entrega: <b>${data.bairro}</b> (+ R$ 15,00)</span>`;
+                        divDetalhes.style.display = 'block';
+                    }
+                    atualizarTotal();
+                })
+                .catch(error => {
+                    msg.innerHTML = "<span class='erro'>Erro ao buscar CEP.</span>";
+                    divDetalhes.style.display = 'none';
+                });
+        }
+
+        function atualizarTotal() {
+            let total = precoBase;
+            document.querySelectorAll('.add-check:checked').forEach(box => { total += parseFloat(box.value); });
+            total += valorFrete;
+            let valorFormatado = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            document.getElementById('valor-total').innerText = valorFormatado;
+            document.getElementById('valor-total-header').innerText = valorFormatado;
+        }
+        document.querySelectorAll('.add-check').forEach(item => { item.addEventListener('change', atualizarTotal); });
+
+        function abrirResumo() {
+            const compNome = document.getElementById('comprador-nome').value;
+            const recNome = document.getElementById('recebedor-nome').value;
+            const numero = document.getElementById('end-numero').value;
+            
+            if (!compNome) { alert("Preencha seu nome."); return; }
+            if (!recNome) { alert("Preencha o nome de quem vai receber."); return; }
+            if (valorFrete === 0) { alert("Calcule o frete."); return; }
+            if (!numero) { alert("Preencha o número da casa."); return; }
+
+            const nomeCesta = document.getElementById('nome-produto').innerText;
+            const total = document.getElementById('valor-total').innerText;
+            
+            let dataEntrega = document.getElementById('data-entrega').value;
+            dataEntrega = dataEntrega ? dataEntrega.split('-').reverse().join('/') : "A combinar";
+            const horaEntrega = document.getElementById('hora-entrega').value || "A combinar";
+            
+            let htmlResumo = `
+                <p><strong>Cesta:</strong> ${nomeCesta}</p>
+                <p><strong>Total:</strong> <span style="color:#D88245; font-weight:bold;">${total}</span></p>
+                <p><strong>Para:</strong> ${recNome}</p>
+                <p><strong>Entrega:</strong> ${dataEntrega} às ${horaEntrega}</p>
+            `;
+            document.getElementById('area-resumo-texto').innerHTML = htmlResumo;
+            
+            document.getElementById('modal-pedido').style.display = 'flex';
+            document.getElementById('etapa-resumo').style.display = 'block';
+            document.getElementById('etapa-pagamento').style.display = 'none';
+        }
+
+        function fecharModal() { document.getElementById('modal-pedido').style.display = 'none'; }
+        function irParaPagamento() { document.getElementById('etapa-resumo').style.display = 'none'; document.getElementById('etapa-pagamento').style.display = 'block'; }
+        function voltarParaResumo() { document.getElementById('etapa-pagamento').style.display = 'none'; document.getElementById('etapa-resumo').style.display = 'block'; }
+
+        function mostrarInfoPagamento(tipo) {
+            document.getElementById('info-pix').style.display = 'none';
+            document.getElementById('info-picpay').style.display = 'none';
+            document.getElementById('info-stone').style.display = 'none';
+            document.getElementById('info-' + tipo).style.display = 'block';
+        }
+
+        function copiarChavePix() {
+            const chave = document.getElementById('chave-pix-texto').innerText;
+            navigator.clipboard.writeText(chave).then(() => alert("Chave Pix copiada!"));
+        }
+
+        // --- A MÁGICA DO WHATSAPP (AGORA COM OS DADOS COMPLETOS) ---
+        function finalizarCompraReal() {
+            const btnConfirmar = document.querySelector('#etapa-pagamento .btn-confirmar-modal');
+            btnConfirmar.innerText = "Redirecionando...";
+            btnConfirmar.disabled = true;
+
+            // 1. Coleta todos os Dados
+            const compNome = document.getElementById('comprador-nome').value;
+            const compZap = document.getElementById('comprador-zap').value;
+            const compEmail = document.getElementById('comprador-email').value;
+            const motivo = document.getElementById('motivo-compra').value;
+            
+            const recNome = document.getElementById('recebedor-nome').value;
+            const recZap = document.getElementById('recebedor-zap').value;
+            
+            const nomeCesta = document.getElementById('nome-produto').innerText;
+            const totalTexto = document.getElementById('valor-total').innerText; 
+            const obs = document.getElementById('end-obs').value;
+            const rua = document.getElementById('end-rua').value;
+            const numero = document.getElementById('end-numero').value;
+            
+            let dataEntrega = document.getElementById('data-entrega').value;
+            dataEntrega = dataEntrega ? dataEntrega.split('-').reverse().join('/') : "A combinar";
+            const horaEntrega = document.getElementById('hora-entrega').value || "A combinar";
+
+            const radios = document.getElementsByName('formaPagamento');
+            let formaPagamento = "Pix";
+            for (var i = 0; i < radios.length; i++) { if (radios[i].checked) formaPagamento = radios[i].value; }
+
+            // 2. Coleta Adicionais e Bilhetes
+            let itensAdicionais = [];
+            let msgBilheteImpresso = "";
+            document.querySelectorAll('.add-check:checked').forEach(box => {
+                let nomeItem = box.getAttribute('data-nome');
+                if(nomeItem === "Foto Revelada") { itensAdicionais.push("Foto"); }
+                else if(nomeItem === "Bilhete Impresso") {
+                    let txt = document.getElementById('mensagem-carta-impressa').value;
+                    msgBilheteImpresso = txt ? `[Impresso: "${txt}"]` : "[Impresso]";
+                } else { itensAdicionais.push(nomeItem); }
+            });
+            const txtMao = document.getElementById('mensagem-carta-mao').value;
+            const checkMao = document.getElementById('check-carta-mao').checked;
+            let bilheteFinal = (checkMao && txtMao ? `[Mão: "${txtMao}"] ` : "") + msgBilheteImpresso;
+            if(!bilheteFinal || bilheteFinal === "") bilheteFinal = "-";
+
+            // 3. Monta o JSON igualzinho ao antigo para preencher TUDO no Google Sheets
+            const dadosPlanilha = {
+                "Data": new Date().toLocaleString('pt-BR'),
+                "Nome": compNome, 
+                "Telefone": compZap, 
+                "Email": compEmail,
+                "Cesta": nomeCesta, 
+                "Adicionais": itensAdicionais.join(", ") || "-",
+                "Bilhete": bilheteFinal, 
+                "Recebedor": recNome, 
+                "Total": totalTexto,
+                "Endereco": `${rua}, ${numero} - ${bairroEncontrado}`,
+                "Obs": `[${formaPagamento}] ` + obs
+            };
+
+            // 4. Monta o Texto bonitinho e COMPLETO para o WhatsApp
+            let zap = `👋 Olá! Gostaria de confirmar um pedido.\n\n`;
+            zap += `📦 *CESTA:* ${nomeCesta}\n`;
+            if (itensAdicionais.length > 0) { zap += `➕ *Adicionais:* ${itensAdicionais.join(', ')}\n`; }
+            if (motivo) { zap += `🎉 *Motivo:* ${motivo}\n`; }
+            if (bilheteFinal !== "-") { zap += `\n💌 *CARTÃO:*\n${bilheteFinal}\n`; }
+            zap += `\n👤 *COMPRADOR:*\nNome: ${compNome}\nTel: ${compZap}\n`;
+            if(compEmail) zap += `Email: ${compEmail}\n`;
+            zap += `\n🎁 *DESTINATÁRIO:*\nNome: ${recNome}\nTel: ${recZap}\n`;
+            zap += `\n🚚 *ENTREGA:*\n📅 Data: ${dataEntrega}\n⏰ Hora: ${horaEntrega}\n📍 ${rua}, ${numero}\n🗺️ ${bairroEncontrado}\n`;
+            if(obs) zap += `⚠️ *Obs:* ${obs}\n`;
+            zap += `\n💰 *VALOR FINAL:* ${totalTexto} (${formaPagamento})`;
+
+            let linkZap = `https://wa.me/${SEU_NUMERO_ZAP}?text=${encodeURIComponent(zap)}`;
+
+            // 5. Manda para a planilha (sem travar o celular)
+            fetch(URL_GOOGLE_SHEETS, {
+                method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(dadosPlanilha)
+            }).catch(e => console.log("Planilha enviada em segundo plano."));
+
+            // 6. Abre o PicPay numa nova aba (se o navegador deixar)
+            if(formaPagamento === 'PicPay') {
+                let valorLimpo = totalTexto.replace("R$", "").replace(/\./g, "").replace(",", ".").trim();
+                window.open(`https://picpay.me/${SEU_USUARIO_PICPAY}/${valorLimpo}`, '_blank');
+            }
+
+            // 7. MANDA DIRETO PRO WHATSAPP NA ABA ATUAL (Burla o bloqueador)
+            window.location.href = linkZap;
+        }
+    </script>
+</body>
+</html>
