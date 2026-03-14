@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Montar Cesta Personalizada | Morning Wish</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- ESTILOS GERAIS --- */
+        :root { --cor-fundo: #FDFBF7; --cor-texto: #4E342E; --cor-destaque: #D88245; --cor-verde: #25D366; --cor-cinza-btn: #808080; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Open Sans', sans-serif; background-color: var(--cor-fundo); color: var(--cor-texto); padding-bottom: 120px; }
+        
+        /* HEADER */
+        header { padding: 10px 5%; background: white; border-bottom: 2px solid #eee; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.05); height: 70px; }
+        .logo-container { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .logo-img { height: 50px; width: auto; }
+        .logo-text { font-family: 'Lato', sans-serif; font-weight: bold; font-size: 1.3rem; color: var(--cor-destaque); }
+        .voltar { text-decoration: none; color: #666; font-size: 0.9rem; font-weight: 600; }
+
+        /* LAYOUT PRINCIPAL */
+        .container-produto { max-width: 900px; margin: 40px auto; padding: 0 20px; }
+        h1 { font-family: 'Lato', sans-serif; font-size: 2.2rem; margin-bottom: 5px; color: var(--cor-destaque); text-align: center;}
+        .descricao { color: #666; margin-bottom: 30px; line-height: 1.8; text-align: center; font-size: 1.1rem;}
+
+        /* AVISO DO CONTADOR DE ITENS */
+        .contador-flutuante { background: #fff8f0; border: 2px dashed var(--cor-destaque); padding: 15px; border-radius: 10px; text-align: center; font-size: 1.2rem; font-weight: bold; color: var(--cor-texto); position: sticky; top: 80px; z-index: 999; margin-bottom: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .contador-flutuante span { color: var(--cor-destaque); font-size: 1.4rem; }
+
+        /* CATEGORIAS E GRID DE ITENS */
+        .categoria-box { background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-left: 5px solid var(--cor-destaque); }
+        .categoria-titulo { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        
+        .grid-itens { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        .item-label { border: 1px solid #ddd; border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; background: #fafafa; }
+        .item-label:hover { border-color: var(--cor-destaque); }
+        .item-label.selecionado { background: #FFFDF5; border-color: var(--cor-destaque); font-weight: bold; }
+        .item-label input { transform: scale(1.3); margin-right: 10px; cursor: pointer; }
+        .item-info { display: flex; flex-direction: column; }
+        .item-preco { font-size: 0.85rem; color: var(--cor-verde); font-weight: bold; margin-top: 2px;}
+        .item-dica { font-size: 0.75rem; color: #888; margin-top: 2px; font-weight: normal;}
+
+        /* ÁREA DE TEXTO DOS CARTÕES */
+        .area-mensagem { display: none; grid-column: 1 / -1; background: #fffdf5; padding: 15px; border-radius: 8px; border: 1px dashed var(--cor-destaque); margin-top: -5px; margin-bottom: 10px; }
+        textarea.msg-box { width: 100%; height: 80px; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; resize: vertical; font-size: 0.95rem; }
+        
+        .secao-titulo { font-weight: bold; margin-bottom: 15px; display: block; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-top: 40px; color: var(--cor-destaque); font-size: 1.4rem;}
+
+        /* AVISOS DE ENTREGA (NOVO) */
+        .box-avisos-entrega { background: #f0f8ff; border: 1px solid #b3d4fc; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; color: #333; }
+        .box-avisos-entrega p { margin-bottom: 8px; }
+        .box-avisos-entrega p:last-child { margin-bottom: 0; }
+
+        /* FORMULÁRIOS */
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 0.9rem; margin-bottom: 5px; color: #666; font-weight: bold; }
+        .input-group input, .input-group textarea, .input-group select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; font-family: inherit; font-size: 1rem;}
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+
+        .cep-wrapper { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+        .cep-wrapper input { width: 60%; background: #f9f9f9; }
+        .cep-wrapper button { padding: 12px 20px; background-color: var(--cor-cinza-btn); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        #msg-frete { font-size: 0.9rem; margin-bottom: 10px; display: block; }
+        .sucesso { color: green; } .erro { color: red; }
+        #endereco-detalhes { display: none; background: #fff8f0; padding: 15px; border-radius: 8px; border: 1px dashed var(--cor-destaque); margin-bottom: 20px; }
+        .linha-endereco { display: flex; gap: 10px; margin-bottom: 10px; }
+        
+        /* BARRA INFERIOR */
+        .resumo-compra { position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 15px 5%; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index: 999; border-radius: 20px 20px 0 0; border-top: 4px solid var(--cor-destaque); display: flex; align-items: center; justify-content: space-between; gap: 20px;}
+        .linha-total { display: flex; flex-direction: column; font-size: 1.1rem; color: #666; }
+        .linha-total span:last-child { font-size: 1.8rem; font-weight: bold; color: var(--cor-texto); }
+        .btn-whatsapp { background-color: var(--cor-verde); color: white; text-align: center; padding: 15px 30px; border-radius: 50px; font-weight: bold; transition: 0.3s; border: none; font-size: 1.1rem; cursor: pointer; flex: 1; max-width: 300px;}
+
+        /* MODAIS */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 20000; justify-content: center; align-items: center; padding: 20px; }
+        .modal-content { background: white; padding: 25px; border-radius: 15px; width: 100%; max-width: 500px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
+        .modal-titulo { font-size: 1.5rem; color: var(--cor-destaque); font-weight: bold; margin-bottom: 15px; text-align: center; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .botoes-modal { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-voltar-modal { flex: 1; padding: 12px; border: 1px solid #ccc; background: white; border-radius: 50px; cursor: pointer; font-weight: bold; color: #666; }
+        .btn-confirmar-modal { flex: 1; padding: 12px; border: none; background: var(--cor-verde); border-radius: 50px; cursor: pointer; font-weight: bold; color: white; }
+
+        .opcao-pagamento { border: 1px solid #ddd; border-radius: 10px; padding: 15px; margin-bottom: 10px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+        .opcao-pagamento:hover { border-color: var(--cor-destaque); background-color: #FFFDF5; }
+        .box-pix { display: none; background: #f9f9f9; padding: 15px; border-radius: 8px; text-align: center; margin-top: 10px; border: 1px dashed #ccc; }
+        .chave-pix { font-family: monospace; background: #eee; padding: 10px; border-radius: 5px; word-break: break-all; margin: 10px 0; font-size: 0.9rem; }
+        .btn-copiar { background: #555; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+
+        @media (max-width: 768px) {
+            .btn-whatsapp { max-width: 100%; font-size: 1rem; padding: 15px 10px;}
+            .linha-total span:last-child { font-size: 1.5rem; }
+            .grid-2, .linha-endereco { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="logo-container">
+            <img src="logo.jpg" alt="Morning Wish" class="logo-img" onerror="this.style.display='none'">
+            <span class="logo-text">Morning Wish</span>
+        </a>
+        <a href="index.html" class="voltar">← Cancelar</a>
+    </header>
+
+    <main class="container-produto">
+        <h1>Sua Cesta, do Seu Jeito</h1>
+        <p class="descricao">Escolha exatamente o que a pessoa mais gosta. A cesta base custa <strong>R$ 49,90</strong> (Incluso: Cesta de Vime, Decoração, Embalagem e Cartão). Adicione até 16 itens deliciosos abaixo!</p>
+
+        <div class="contador-flutuante">
+            Itens na Cesta: <span id="contador-tela">0</span>/16
+            <p style="font-size: 0.8rem; color: #888; font-weight: normal; margin-top: 5px;">Selecione seus favoritos nas categorias abaixo.</p>
+        </div>
+
+        <div class="categoria-box">
+            <div class="categoria-titulo">🥖 Pães e Salgados</div>
+            <div class="grid-itens">
+                <label class="item-label"><input type="checkbox" class="check-item" value="8.00" data-nome="Pão Francês (2 un)"> <div class="item-info"><span>Pão Francês (2 un)</span><span class="item-preco">+ R$ 8,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="12.00" data-nome="Croissant"> <div class="item-info"><span>Croissant</span><span class="item-preco">+ R$ 12,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="15.00" data-nome="Pão de Queijo (5 un)"> <div class="item-info"><span>Pão de Queijo (5)</span><span class="item-preco">+ R$ 15,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="10.00" data-nome="Torradas Finas"> <div class="item-info"><span>Torradas Finas</span><span class="item-preco">+ R$ 10,00</span></div></label>
+            </div>
+        </div>
+
+        <div class="categoria-box">
+            <div class="categoria-titulo">☕ Bebidas</div>
+            <div class="grid-itens">
+                <label class="item-label"><input type="checkbox" class="check-item" value="12.00" data-nome="Suco de Laranja (500ml)"> <div class="item-info"><span>Suco Laranja</span><span class="item-preco">+ R$ 12,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="12.00" data-nome="Suco de Uva (500ml)"> <div class="item-info"><span>Suco Uva</span><span class="item-preco">+ R$ 12,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="8.00" data-nome="Café Solúvel Premium"> <div class="item-info"><span>Café Premium</span><span class="item-preco">+ R$ 8,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="6.00" data-nome="Achocolatado/Cappuccino"> <div class="item-info"><span>Cappuccino</span><span class="item-preco">+ R$ 6,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="5.00" data-nome="Chá Especial"> <div class="item-info"><span>Chá Especial</span><span class="item-preco">+ R$ 5,00</span></div></label>
+            </div>
+        </div>
+
+        <div class="categoria-box">
+            <div class="categoria-titulo">🍎 Frutas Frescas</div>
+            <div class="grid-itens">
+                <label class="item-label"><input type="checkbox" class="check-item" value="8.00" data-nome="Maçã"> <div class="item-info"><span>Maçã</span><span class="item-preco">+ R$ 8,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="10.00" data-nome="Cacho de Uva"> <div class="item-info"><span>Cacho de Uva</span><span class="item-preco">+ R$ 10,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="15.00" data-nome="Morangos"> <div class="item-info"><span>Morangos</span><span class="item-preco">+ R$ 15,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="7.00" data-nome="Mamão"> <div class="item-info"><span>Mamão</span><span class="item-preco">+ R$ 7,00</span></div></label>
+            </div>
+        </div>
+
+        <div class="categoria-box">
+            <div class="categoria-titulo">🥞 Delícias (Doces e Frios)</div>
+            <div class="grid-itens">
+                <label class="item-label"><input type="checkbox" class="check-item" value="18.00" data-nome="Porção de Frios (Queijo/Presunto)"> <div class="item-info"><span>Porção de Frios</span><span class="item-preco">+ R$ 18,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="14.00" data-nome="Bolo Caseiro"> <div class="item-info"><span>Bolo Caseiro</span><span class="item-preco">+ R$ 14,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="12.00" data-nome="Waffle com Mel"> <div class="item-info"><span>Waffle c/ Mel</span><span class="item-preco">+ R$ 12,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="15.00" data-nome="Nutella (140g)"> <div class="item-info"><span>Nutella (140g)</span><span class="item-preco">+ R$ 15,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="8.00" data-nome="Geleia Artesanal"> <div class="item-info"><span>Geleia</span><span class="item-preco">+ R$ 8,00</span></div></label>
+            </div>
+        </div>
+
+        <div class="categoria-box" style="border-left-color: #ff6b6b; background-color: #fff9f9;">
+            <div class="categoria-titulo" style="color: #ff6b6b;">🎈 Mimos e Decoração (Extras)</div>
+            <p style="font-size: 0.9rem; color: #666; margin-top: -10px; margin-bottom: 15px;">Pequenos detalhes que fazem a diferença e emocionam!</p>
+            <div class="grid-itens">
+                
+                <label class="item-label"><input type="checkbox" class="check-item" value="15.00" data-nome="Balão Coração Metálico"> <div class="item-info"><span>Balão Coração Metálico</span><span class="item-preco">+ R$ 15,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="25.00" data-nome="Caneca Morning Wish"> <div class="item-info"><span>Caneca Morning Wish</span><span class="item-preco">+ R$ 25,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="18.00" data-nome="Mini Suculenta/Flor"> <div class="item-info"><span>Mini Suculenta / Flor</span><span class="item-preco">+ R$ 18,00</span></div></label>
+
+                <label class="item-label">
+                    <input type="checkbox" class="check-item" id="check-foto" value="5.00" data-nome="Foto Polaróide"> 
+                    <div class="item-info">
+                        <span>Foto Polaróide</span>
+                        <span class="item-dica">Requer 36h de antecedência!</span>
+                        <span class="item-preco">+ R$ 5,00</span>
+                    </div>
+                </label>
+
+                <label class="item-label">
+                    <input type="checkbox" class="check-item" value="0.00" data-nome="Cartão à Mão" id="check-carta-mao" onchange="toggleMensagem('area-texto-carta-mao', this)"> 
+                    <div class="item-info">
+                        <span>Cartão Escrito à Mão</span>
+                        <span class="item-dica">Nós escrevemos por você.</span>
+                        <span class="item-preco" style="color: #D88245;">Grátis</span>
+                    </div>
+                </label>
+                <div id="area-texto-carta-mao" class="area-mensagem">
+                    <p style="font-size: 0.85rem; color: #666; margin-bottom: 5px; font-weight: bold;">Escreva sua mensagem (Manuscrita):</p>
+                    <textarea id="mensagem-carta-mao" class="msg-box" maxlength="300" placeholder="Ex: Bom dia meu amor! Que o seu dia seja tão doce quanto esta cesta. Te amo!" oninput="contarLetras(this, 'contador-letras-mao')"></textarea>
+                    <div style="text-align: right; font-size: 0.8rem; color: #666; margin-top: 2px;"><span id="contador-letras-mao">0</span>/300</div>
+                </div>
+
+                <label class="item-label">
+                    <input type="checkbox" class="check-item" value="3.00" data-nome="Cartão Impresso" id="check-carta-impressa" onchange="toggleMensagem('area-texto-carta-impressa', this)"> 
+                    <div class="item-info">
+                        <span>Cartão Mensagem Impresso</span>
+                        <span class="item-dica">Requer 36h de antecedência!</span>
+                        <span class="item-preco">+ R$ 3,00</span>
+                    </div>
+                </label>
+                <div id="area-texto-carta-impressa" class="area-mensagem">
+                    <p style="font-size: 0.85rem; color: #666; margin-bottom: 5px; font-weight: bold;">Escreva sua mensagem (Impressa):</p>
+                    <textarea id="mensagem-carta-impressa" class="msg-box" maxlength="300" placeholder="Mensagem para o cartão impresso..." oninput="contarLetras(this, 'contador-letras-impressa')"></textarea>
+                    <div style="text-align: right; font-size: 0.8rem; color: #666; margin-top: 2px;"><span id="contador-letras-impressa">0</span>/300</div>
+                </div>
+
+            </div>
+        </div>
+
+        <span class="secao-titulo">🚚 Dados e Horários de Entrega</span>
+        
+        <div class="box-avisos-entrega">
+            <p><strong>🕒 Horário de Entrega:</strong> Apenas das 07:00 às 18:00.</p>
+            <p><strong>⏳ Entregas Padrão:</strong> Pedidos feitos até as 18:00 podem ser entregues amanhã.</p>
+            <p><strong>⚠️ Fotos e Cartões Impressos:</strong> Requerem <strong>36 horas</strong> de antecedência para produção.</p>
+        </div>
+
+        <div class="input-group">
+            <label>Qual o motivo do presente?</label>
+            <input type="text" id="motivo-compra" placeholder="Ex: Aniversário, Dia das Mães...">
+        </div>
+
+        <div class="grid-2">
+            <div class="input-group"><label>Seu Nome Completo:</label><input type="text" id="comprador-nome" placeholder="Digite seu nome"></div>
+            <div class="input-group"><label>Seu WhatsApp:</label><input type="tel" id="comprador-zap" placeholder="(00) 00000-0000"></div>
+        </div>
+
+        <div class="grid-2">
+            <div class="input-group"><label>Nome de quem vai receber:</label><input type="text" id="recebedor-nome" placeholder="Nome do destinatário"></div>
+            <div class="input-group"><label>WhatsApp de quem vai receber:</label><input type="tel" id="recebedor-zap" placeholder="(00) 00000-0000"></div>
+        </div>
+
+        <div class="grid-2">
+            <div class="input-group"><label>Data da Entrega:</label><input type="date" id="data-entrega"></div>
+            <div class="input-group"><label>Hora da Entrega:</label><input type="time" id="hora-entrega" min="07:00" max="18:00"></div>
+        </div>
+
+        <label class="opcao-extra" id="box-urgencia" style="display: none; border-color: red; background: #fff0f0;">
+            <div class="texto-extra">
+                <input type="checkbox" id="check-urgencia" onchange="toggleUrgencia(this)">
+                <div style="display: flex; flex-direction: column;">
+                    <span style="color: red;">🚨 Entrega para Amanhã (Taxa de Urgência)</span>
+                    <span style="font-size: 0.75rem; color: #888;">Seu pedido passou das 18h. Marque para liberar amanhã.</span>
+                </div>
+            </div>
+            <span class="preco-extra" style="color: red;">+ R$ 20,00</span>
+        </label>
+
+        <div class="cep-wrapper" style="margin-top: 15px;">
+            <input type="text" id="input-cep" placeholder="CEP da entrega" maxlength="9">
+            <button onclick="buscarEndereco()">Buscar Frete</button>
+        </div>
+        <span id="msg-frete"></span>
+
+        <div id="endereco-detalhes">
+            <div class="linha-endereco">
+                <div class="input-group" style="flex: 3;"><label>Rua:</label><input type="text" id="end-rua" placeholder="Rua..."></div>
+                <div class="input-group" style="flex: 1;"><label>Nº:</label><input type="text" id="end-numero" placeholder="Nº"></div>
+            </div>
+            <div class="input-group">
+                <label>Observações (Interfone, Bloco):</label>
+                <textarea id="end-obs" placeholder="Ex: Deixar na portaria..."></textarea>
+            </div>
+        </div>
+
+    </main>
+
+    <div class="resumo-compra">
+        <div class="linha-total">
+            <span>Total da Cesta:</span>
+            <span id="valor-total-exibicao">R$ 49,90</span>
+        </div>
+        <button onclick="abrirResumo()" class="btn-whatsapp">Conferir e Pagar</button>
+    </div>
+
+    <div id="modal-pedido" class="modal-overlay">
+        <div class="modal-content" id="etapa-resumo">
+            <div class="modal-titulo">📝 Resumo da Sua Cesta</div>
+            <div id="area-resumo-texto" class="resumo-lista"></div>
+            <div class="botoes-modal">
+                <button class="btn-voltar-modal" onclick="fecharModal()">← Mudar Itens</button>
+                <button class="btn-confirmar-modal" onclick="irParaPagamento()">Ir para Pagamento 💳</button>
+            </div>
+        </div>
+
+        <div class="modal-content" id="etapa-pagamento" style="display: none;">
+            <div class="modal-titulo">🤑 Pagamento</div>
+            <p style="text-align: center; margin-bottom: 15px; color: #666;">Como deseja pagar?</p>
+            
+            <label class="opcao-pagamento" onclick="mostrarInfoPagamento('pix')">
+                <input type="radio" name="formaPagamento" value="Pix" checked>
+                <span>💠 <b>PIX</b> (Chave Aleatória/CPF)</span>
+            </label>
+            <div id="info-pix" class="box-pix" style="display: block;">
+                <p style="font-size: 0.9rem;">Copie a chave e pague no seu banco:</p>
+                <div class="chave-pix" id="chave-pix-texto">41 988506306</div> <button class="btn-copiar" onclick="copiarChavePix()">Copiar Chave</button>
+            </div>
+
+            <label class="opcao-pagamento" onclick="mostrarInfoPagamento('picpay')">
+                <input type="radio" name="formaPagamento" value="PicPay">
+                <span>💚 <b>PicPay</b> (Cartão de Crédito / Saldo)</span>
+            </label>
+            <div id="info-picpay" class="box-pix" style="display: none;">
+                <p>Abriremos o <b>PicPay</b> com o valor exato. Aceita Cartão.</p>
+            </div>
+
+            <label class="opcao-pagamento" onclick="mostrarInfoPagamento('stone')">
+                <input type="radio" name="formaPagamento" value="Cartão (Stone)">
+                <span>💳 <b>Cartão Crédito/Débito</b> (Stone)</span>
+            </label>
+            <div id="info-stone" class="box-pix" style="display: none;">
+                <p style="font-size: 0.9rem;">Mandaremos o link pelo WhatsApp ou passamos na maquininha na entrega.</p>
+            </div>
+
+            <div class="botoes-modal">
+                <button class="btn-voltar-modal" onclick="voltarParaResumo()">← Voltar</button>
+                <button class="btn-confirmar-modal" onclick="finalizarCompraReal()">Finalizar Pedido ✅</button>
+            </div>
+        </div>
+
+        <div class="modal-content" id="etapa-sucesso" style="display: none; text-align: center;">
+            <div class="modal-titulo">🎉 Cesta Criada!</div>
+            <p style="font-size: 1.1rem; color: #555; margin: 20px 0;">Sua cesta personalizada foi salva!<br>Aguarde o WhatsApp abrir.</p>
+            <button class="btn-inicio" onclick="window.location.href='index.html'">Voltar para o Início</button>
+        </div>
+    </div>
+
+    <script>
+        const URL_GOOGLE_SHEETS = "https://script.google.com/macros/s/AKfycbxJwQq4tfvHkav730vm8uIlmM662mFXQD4k9GWNUYhIFFruxM0BcUZTRlFUE28W2Q-5/exec"; 
+        const SEU_NUMERO_ZAP = "5541988506306"; 
+        const SEU_USUARIO_PICPAY = "osmorningwish"; 
+        
+        const PRECO_BASE_CESTA = 49.90;
+        let valorFrete = 0;
+        let taxaUrgencia = 0;
+        let bairroEncontrado = "";
+        const MAX_ITENS = 16;
+
+        // --- SISTEMA DE REGRAS DE DATA/HORA (NOVO) ---
+        window.onload = function() {
+            const inputData = document.getElementById('data-entrega');
+            const agora = new Date();
+            const horaAtual = agora.getHours();
+            
+            let amanha = new Date(agora); amanha.setDate(agora.getDate() + 1);
+            let strAmanha = amanha.toISOString().split('T')[0];
+
+            let depoisDeAmanha = new Date(agora); depoisDeAmanha.setDate(agora.getDate() + 2);
+            let strDepois = depoisDeAmanha.toISOString().split('T')[0];
+
+            const boxUrgencia = document.getElementById('box-urgencia');
+
+            if (horaAtual >= 18) {
+                inputData.min = strDepois; 
+                boxUrgencia.style.display = 'flex';
+            } else {
+                inputData.min = strAmanha; 
+                boxUrgencia.style.display = 'none';
+            }
+        };
+
+        function toggleUrgencia(checkbox) {
+            const inputData = document.getElementById('data-entrega');
+            let agora = new Date();
+            let amanha = new Date(agora); amanha.setDate(agora.getDate() + 1);
+            let depois = new Date(agora); depois.setDate(agora.getDate() + 2);
+
+            if (checkbox.checked) {
+                taxaUrgencia = 20.00;
+                inputData.min = amanha.toISOString().split('T')[0];
+            } else {
+                taxaUrgencia = 0;
+                inputData.min = depois.toISOString().split('T')[0]; 
+                if(inputData.value === amanha.toISOString().split('T')[0]) {
+                    inputData.value = ""; 
+                }
+            }
+            atualizarTotalBase();
+        }
+
+        // --- FUNÇÕES DE TEXTO DO CARTÃO ---
+        function toggleMensagem(idArea, checkbox) {
+            const area = document.getElementById(idArea);
+            if(checkbox.checked) {
+                area.style.display = 'block';
+                area.querySelector('textarea').focus();
+            } else {
+                area.style.display = 'none';
+                area.querySelector('textarea').value = '';
+                area.querySelector('span[id^="contador"]').innerText = '0';
+            }
+        }
+
+        function contarLetras(input, idContador) {
+            var contador = document.getElementById(idContador);
+            var qtd = input.value.length;
+            contador.innerText = qtd;
+            if (qtd === 300) { contador.style.color = "red"; contador.style.fontWeight = "bold"; } 
+            else { contador.style.color = "#666"; contador.style.fontWeight = "normal"; }
+        }
+
+        // Lógica de Limite e Preço
+        document.querySelectorAll('.check-item').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                let selecionados = document.querySelectorAll('.check-item:checked');
+                let qtd = selecionados.length;
+                
+                document.getElementById('contador-tela').innerText = qtd;
+
+                if(this.checked) this.closest('.item-label').classList.add('selecionado');
+                else this.closest('.item-label').classList.remove('selecionado');
+
+                if (qtd >= MAX_ITENS) {
+                    document.querySelectorAll('.check-item:not(:checked)').forEach(cb => cb.disabled = true);
+                } else {
+                    document.querySelectorAll('.check-item:not(:checked)').forEach(cb => cb.disabled = false);
+                }
+
+                atualizarTotalBase();
+            });
+        });
+
+        function atualizarTotalBase() {
+            let total = PRECO_BASE_CESTA + valorFrete + taxaUrgencia;
+            document.querySelectorAll('.check-item:checked').forEach(box => {
+                total += parseFloat(box.value);
+            });
+            document.getElementById('valor-total-exibicao').innerText = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        // Tabela de Fretes
+        const tabelaFreteBairro = { "Cidade Industrial": 5.00, "Fazendinha": 8.00, "Campo Comprido": 8.00, "Pinheirinho": 12.00, "Portão": 15.00, "Batel": 15.00, "Centro": 15.00, "Boqueirão": 20.00 };
+        const tabelaFreteCidade = { "Araucária": 20.00, "São José dos Pinhais": 30.00, "Curitiba": 18.00 };
+
+        function buscarEndereco() {
+            let cep = document.getElementById('input-cep').value.replace(/\D/g, '');
+            let msg = document.getElementById('msg-frete');
+            let divDetalhes = document.getElementById('endereco-detalhes');
+
+            if (cep.length !== 8) { msg.innerHTML = "<span class='erro'>CEP inválido.</span>"; divDetalhes.style.display = 'none'; return; }
+            msg.innerText = "Buscando...";
+            fetch(`https://viacep.com.br/ws/${cep}/json/`).then(res => res.json()).then(data => {
+                if (data.erro) {
+                    msg.innerHTML = "<span class='erro'>Não encontrado!</span>"; valorFrete = 0; divDetalhes.style.display = 'none';
+                } else {
+                    bairroEncontrado = data.bairro;
+                    let cidadeEncontrada = data.localidade;
+
+                    if (tabelaFreteBairro[bairroEncontrado] !== undefined) valorFrete = tabelaFreteBairro[bairroEncontrado];
+                    else if (tabelaFreteCidade[cidadeEncontrada] !== undefined) valorFrete = tabelaFreteCidade[cidadeEncontrada];
+                    else valorFrete = 40.00;
+
+                    document.getElementById('end-rua').value = data.logradouro;
+                    document.getElementById('end-numero').focus();
+                    msg.innerHTML = `<span class='sucesso'>Entrega em <b>${data.bairro}</b> (+ R$ ${valorFrete.toFixed(2).replace('.', ',')})</span>`;
+                    divDetalhes.style.display = 'block';
+                }
+                atualizarTotalBase();
+            }).catch(e => { msg.innerHTML = "<span class='erro'>Erro ao buscar CEP.</span>"; divDetalhes.style.display = 'none'; });
+        }
+
+        // Modais e Resumo
+        function abrirResumo() {
+            const qtdItens = document.querySelectorAll('.check-item:checked').length;
+            if (qtdItens === 0) { alert("Escolha pelo menos 1 item para sua cesta!"); return; }
+            
+            const compNome = document.getElementById('comprador-nome').value;
+            const recNome = document.getElementById('recebedor-nome').value;
+            const num = document.getElementById('end-numero').value;
+            if (!compNome || !recNome || valorFrete === 0 || !num) { alert("Preencha todos os dados de entrega e frete."); return; }
+
+            const horaEntrega = document.getElementById('hora-entrega').value;
+            if (!horaEntrega || horaEntrega < "07:00" || horaEntrega > "18:00") { alert("Por favor, selecione um horário válido de entrega entre 07:00 e 18:00."); return; }
+            
+            const dataEntregaStr = document.getElementById('data-entrega').value;
+            if(!dataEntregaStr) { alert("Por favor, selecione a data de entrega."); return; }
+
+            // VALIDAÇÃO DA REGRA DE 36 HORAS
+            let temItemDemorado = false;
+            if (document.getElementById('check-foto') && document.getElementById('check-foto').checked) temItemDemorado = true;
+            if (document.getElementById('check-carta-impressa') && document.getElementById('check-carta-impressa').checked) temItemDemorado = true;
+
+            if (temItemDemorado) {
+                let dataEscolhidaObj = new Date(`${dataEntregaStr}T${horaEntrega}`);
+                let dataLimite36h = new Date();
+                dataLimite36h.setHours(dataLimite36h.getHours() + 36);
+
+                if (dataEscolhidaObj < dataLimite36h) {
+                    alert("⚠️ ALERTA DE PRODUÇÃO!\n\nVocê selecionou 'Foto Polaróide' ou 'Cartão Impresso'.\nEstes itens exigem um mínimo de 36 horas de antecedência.\n\nPor favor, escolha uma data/hora mais adiante ou remova esses itens para receber a cesta antes.");
+                    return; 
+                }
+            }
+
+            let lista = [];
+            document.querySelectorAll('.check-item:checked').forEach(box => lista.push(box.getAttribute('data-nome')));
+            
+            const totalStr = document.getElementById('valor-total-exibicao').innerText;
+            const entrega = dataEntregaStr.split('-').reverse().join('/');
+            
+            let html = `
+                <p><strong>Cesta:</strong> Personalizada (${qtdItens} itens)</p>
+                <p><strong>Itens:</strong> ${lista.join(', ')}</p>
+                <p><strong>Para:</strong> ${recNome}</p>
+                <p><strong>Entrega:</strong> ${entrega} às ${horaEntrega}</p>
+                <p><strong>Total:</strong> <span style="color:#D88245; font-weight:bold;">${totalStr}</span></p>
+            `;
+            if (taxaUrgencia > 0) html += `<p style="color:red; font-weight:bold;">Inclui Taxa de Urgência</p>`;
+
+            document.getElementById('area-resumo-texto').innerHTML = html;
+            
+            document.getElementById('modal-pedido').style.display = 'flex';
+            document.getElementById('etapa-resumo').style.display = 'block';
+            document.getElementById('etapa-pagamento').style.display = 'none';
+        }
+
+        function fecharModal() { document.getElementById('modal-pedido').style.display = 'none'; }
+        function irParaPagamento() { document.getElementById('etapa-resumo').style.display = 'none'; document.getElementById('etapa-pagamento').style.display = 'block'; }
+        function voltarParaResumo() { document.getElementById('etapa-pagamento').style.display = 'none'; document.getElementById('etapa-resumo').style.display = 'block'; }
+        
+        function mostrarInfoPagamento(t) { document.getElementById('info-pix').style.display = 'none'; document.getElementById('info-picpay').style.display = 'none'; document.getElementById('info-stone').style.display = 'none'; document.getElementById('info-' + t).style.display = 'block'; }
+        function copiarChavePix() { navigator.clipboard.writeText(document.getElementById('chave-pix-texto').innerText).then(()=>alert("Copiada!")); }
+
+       // --- A MÁGICA DO WHATSAPP (CORRIGIDA) ---
+        function finalizarCompraReal() {
+            try {
+                document.querySelector('#etapa-pagamento .btn-confirmar-modal').innerText = "Enviando...";
+                
+                let itens = [];
+                document.querySelectorAll('.check-item:checked').forEach(b => {
+                    let nome = b.getAttribute('data-nome');
+                    if(nome !== "Cartão à Mão" && nome !== "Cartão Impresso") { itens.push(nome); }
+                });
+                
+                let radios = document.getElementsByName('formaPagamento');
+                let formPg = "Pix"; for(let r of radios){ if(r.checked) formPg = r.value; }
+
+                const totalStr = document.getElementById('valor-total-exibicao').innerText;
+                const rua = document.getElementById('end-rua') ? document.getElementById('end-rua').value : "";
+                const num = document.getElementById('end-numero') ? document.getElementById('end-numero').value : "";
+                const dtRaw = document.getElementById('data-entrega') ? document.getElementById('data-entrega').value : "";
+                const dt = dtRaw ? dtRaw.split('-').reverse().join('/') : "A comb.";
+                const hr = document.getElementById('hora-entrega') ? document.getElementById('hora-entrega').value : "";
+
+                let bilheteFinal = "";
+                const msgMao = document.getElementById('mensagem-carta-mao') ? document.getElementById('mensagem-carta-mao').value : "";
+                const msgImp = document.getElementById('mensagem-carta-impressa') ? document.getElementById('mensagem-carta-impressa').value : "";
+                
+                if (document.getElementById('check-carta-mao') && document.getElementById('check-carta-mao').checked) bilheteFinal += `[À Mão: "${msgMao || "Sem texto"}"] `;
+                if (document.getElementById('check-carta-impressa') && document.getElementById('check-carta-impressa').checked) bilheteFinal += `[Impresso: "${msgImp || "Sem texto"}"]`;
+                if (bilheteFinal === "") bilheteFinal = "-";
+
+                const compNome = document.getElementById('comprador-nome') ? document.getElementById('comprador-nome').value : "Não informado";
+                const recNome = document.getElementById('recebedor-nome') ? document.getElementById('recebedor-nome').value : "Não informado";
+
+                const dados = {
+                    "Data": new Date().toLocaleString(),
+                    "Nome": compNome,
+                    "Telefone": document.getElementById('comprador-zap') ? document.getElementById('comprador-zap').value : "",
+                    "Email": document.getElementById('comprador-email') ? document.getElementById('comprador-email').value : "",
+                    "Cesta": "Personalizada", // Mesma planilha, só muda o tipo
+                    "Adicionais": itens.join(', ') || "Nenhum item",
+                    "Bilhete": bilheteFinal,
+                    "Recebedor": recNome,
+                    "Total": totalStr,
+                    "Endereco": `${rua}, ${num} - ${bairroEncontrado}`,
+                    "Obs": `[${formPg}] ` + (document.getElementById('end-obs') ? document.getElementById('end-obs').value : "")
+                };
+
+                fetch(URL_GOOGLE_SHEETS, { method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(dados) })
+                .catch(e => console.log("Planilha background falhou."));
+
+                let zap = `👋 Pedido de *CESTA PERSONALIZADA*\n\n📦 *ITENS:* \n- ${itens.join('\n- ')}\n`;
+                if (bilheteFinal !== "-") zap += `\n💌 *MENSAGEM DO CARTÃO:*\n${bilheteFinal}\n`;
+                if (typeof taxaUrgencia !== 'undefined' && taxaUrgencia > 0) zap += `\n🚨 *INCLUI TAXA DE URGÊNCIA*\n`;
+                zap += `\n💰 *TOTAL:* ${totalStr} (${formPg})\n\n👤 De: ${compNome}\n🎁 Para: ${recNome}\n🚚 ${dt} às ${hr}\n📍 ${rua}, ${num}\n⚠️ Obs: ${document.getElementById('end-obs') ? document.getElementById('end-obs').value : ""}`;
+
+                let linkZap = `https://wa.me/${SEU_NUMERO_ZAP}?text=${encodeURIComponent(zap)}`;
+
+                // Atraso de segurança para abrir o Zap sem quebrar a aba
+                setTimeout(() => {
+                    if(formPg === 'PicPay') {
+                        let valorLimpo = totalStr.replace("R$","").replace(/\./g,"").replace(",",".").trim();
+                        window.open(`https://picpay.me/${SEU_USUARIO_PICPAY}/${valorLimpo}`, '_blank');
+                    }
+                    window.location.href = linkZap;
+                }, 800);
+
+            } catch (error) {
+                console.error("Erro interno:", error);
+                alert("Ocorreu um erro no redirecionamento, mas vamos tentar abrir o WhatsApp!");
+                window.location.href = `https://wa.me/${SEU_NUMERO_ZAP}?text=Olá, tentei montar uma cesta personalizada mas o site travou.`;
+            }
+        }
+    </script>
+</body>
+</html>
