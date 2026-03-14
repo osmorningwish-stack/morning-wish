@@ -39,24 +39,9 @@
             height: 70px;
         }
         
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
-        }
-
-        .logo-img {
-            height: 70px;
-            width: auto;
-        }
-
-        .logo-text { 
-            font-size: 1.5rem; 
-            color: var(--cor-destaque); 
-            font-weight: bold; 
-        }
-
+        .logo-container { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .logo-img { height: 70px; width: auto; }
+        .logo-text { font-size: 1.5rem; color: var(--cor-destaque); font-weight: bold; }
         nav ul { display: flex; gap: 20px; list-style: none; }
         
         /* --- HERO --- */
@@ -70,46 +55,40 @@
         .cards-container { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; margin-top: 30px; }
         .card { background: white; border-radius: 15px; width: 300px; padding: 30px 20px; box-shadow: var(--sombra-card); border-top: 5px solid var(--cor-destaque); display: flex; flex-direction: column; justify-content: space-between; }
         .preco { font-size: 2rem; color: var(--cor-destaque); font-weight: bold; display: block; margin: 15px 0; }
+        .img-cesta-card { width: 100%; height: 220px; object-fit: cover; border-radius: 10px; margin-bottom: 20px; transition: transform 0.3s ease; }
+        .card:hover .img-cesta-card { transform: scale(1.05); }
+        .lista-itens { text-align: left; margin-bottom: 25px; color: #555; list-style: none; }
+        .lista-itens li { border-bottom: 1px dashed #eee; padding: 5px 0; }
         
-        /* --- ESTILO NOVO: IMAGEM DENTRO DO CARD --- */
-        .img-cesta-card {
-            width: 100%;
-            height: 220px;
-            object-fit: cover; /* Garante que a foto não fique esmagada/esticada */
-            border-radius: 10px;
-            margin-bottom: 20px;
-            transition: transform 0.3s ease; /* Animação suave */
-        }
-        
-        /* Efeito de zoom na foto quando passa o mouse por cima do card */
-        .card:hover .img-cesta-card {
-            transform: scale(1.05);
-        }
-        
-        .btn-comprar {
-            background-color: #25D366;
-            color: white;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: bold;
-            display: block;
-            margin-top: auto;
-            cursor: pointer;
-            text-align: center;
-        }
+        .btn-comprar { background-color: #25D366; color: white; padding: 12px; border-radius: 8px; font-weight: bold; display: block; margin-top: auto; cursor: pointer; text-align: center; }
         .btn-comprar:hover { background-color: #1ebc57; }
+
+        /* --- BANNER CESTA PERSONALIZADA (NOVO) --- */
+        .banner-personalizada {
+            background: linear-gradient(135deg, #FFFDF5 0%, #ffe9d6 100%);
+            border: 2px dashed var(--cor-destaque);
+            border-radius: 20px;
+            padding: 40px 20px;
+            max-width: 960px;
+            margin: 0 auto 50px;
+            text-align: center;
+            box-shadow: var(--sombra-card);
+        }
+        .banner-personalizada h2 { color: var(--cor-destaque); font-size: 2.2rem; margin-bottom: 10px; }
+        .banner-personalizada p { color: #555; font-size: 1.1rem; margin-bottom: 25px; max-width: 600px; margin-left: auto; margin-right: auto;}
+        .btn-personalizar { background-color: var(--cor-destaque); color: white; padding: 15px 40px; border-radius: 50px; font-size: 1.2rem; font-weight: bold; display: inline-block; transition: 0.3s; }
+        .btn-personalizar:hover { background-color: var(--cor-destaque-hover); transform: translateY(-3px); }
 
         /* --- DEPOIMENTOS --- */
         .depoimentos { background-color: #fff8f0; padding: 60px 5%; text-align: center; }
         .depoimento-card { max-width: 600px; margin: 0 auto 20px; font-style: italic; color: #666; }
         .autor { font-weight: bold; color: var(--cor-texto); margin-top: 5px; display: block; }
-
-        /* --- FOOTER --- */
         footer { background: var(--cor-texto); color: #FDFBF7; text-align: center; padding: 30px; }
 
         @media (max-width: 768px) {
             nav ul { display: none; }
             .hero h1 { font-size: 2rem; }
+            .banner-personalizada h2 { font-size: 1.8rem; }
         }
     </style>
 </head>
@@ -135,45 +114,45 @@
     </section>
 
     <section class="produtos" id="cestas">
-        <h2>Escolha sua Cesta</h2>
+        <h2>Nossas Cestas Prontas</h2>
         <div class="cards-container">
             
             <div class="card">
                 <h3>Cesta Despertar</h3>
                 <span class="preco">R$ 89,90</span>
-                
                 <img src="Despertar.jpg" alt="Cesta Despertar" class="img-cesta-card">
-                
                 <a href="produto.html?id=despertar" class="btn-comprar">Ver Detalhes e Comprar</a>
             </div>
 
             <div class="card">
                 <h3>Cesta Amanhecer</h3>
                 <span class="preco">R$ 99,90</span>
-                
                 <img src="Amanhecer.jpg" alt="Cesta Amanhecer" class="img-cesta-card">
-                
                 <a href="produto.html?id=amanhecer" class="btn-comprar">Ver Detalhes e Comprar</a>
             </div>
 
             <div class="card">
                 <h3>Cesta Romântica</h3>
                 <span class="preco">R$ 149,90</span>
-                
                 <img src="romantica.jpg" alt="Cesta Romântica" class="img-cesta-card">
-                
                 <a href="produto.html?id=romantica" class="btn-comprar">Ver Detalhes e Comprar</a>
             </div>
 
             <div class="card">
                 <h3>Cesta Família</h3>
                 <span class="preco">R$ 199,90</span>
-                
                 <img src="Familia.jpg" alt="Cesta Família" class="img-cesta-card">
-                
                 <a href="produto.html?id=familia" class="btn-comprar">Ver Detalhes e Comprar</a>
             </div>
 
+        </div>
+    </section>
+
+    <section style="padding: 0 5%;">
+        <div class="banner-personalizada">
+            <h2>✨ Personalize sua Cesta</h2>
+            <p>Quer montar do seu jeito? Escolha até 10 itens entre pães, frutas, bebidas e delícias e monte o café da manhã perfeito para surpreender quem você ama!</p>
+            <a href="personalizada.html" class="btn-personalizar">Montar Minha Cesta Agora 🎁</a>
         </div>
     </section>
 
