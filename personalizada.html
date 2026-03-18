@@ -31,13 +31,16 @@
 
         /* CATEGORIAS E GRID DE ITENS */
         .categoria-box { background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-left: 5px solid var(--cor-destaque); }
-        .categoria-titulo { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .categoria-titulo { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
+        .categoria-limite { display: block; font-size: 0.85rem; color: #888; margin-bottom: 15px; }
         
         .grid-itens { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
         .item-label { border: 1px solid #ddd; border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; background: #fafafa; }
         .item-label:hover { border-color: var(--cor-destaque); }
         .item-label.selecionado { background: #FFFDF5; border-color: var(--cor-destaque); font-weight: bold; }
         .item-label input { transform: scale(1.3); margin-right: 10px; cursor: pointer; }
+        .item-label input:disabled { cursor: not-allowed; }
+        .item-label.desabilitado { opacity: 0.5; cursor: not-allowed; }
         .item-info { display: flex; flex-direction: column; }
         .item-preco { font-size: 0.85rem; color: var(--cor-verde); font-weight: bold; margin-top: 2px;}
         .item-dica { font-size: 0.75rem; color: #888; margin-top: 2px; font-weight: normal;}
@@ -81,8 +84,9 @@
         .btn-voltar-modal { flex: 1; padding: 12px; border: 1px solid #ccc; background: white; border-radius: 50px; cursor: pointer; font-weight: bold; color: #666; }
         .btn-confirmar-modal { flex: 1; padding: 12px; border: none; background: var(--cor-verde); border-radius: 50px; cursor: pointer; font-weight: bold; color: white; }
 
-        .opcao-pagamento { border: 1px solid #ddd; border-radius: 10px; padding: 15px; margin-bottom: 10px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
-        .opcao-pagamento:hover { border-color: var(--cor-destaque); background-color: #FFFDF5; }
+        /* ESTILOS PAGAMENTO (VOLTOU AO ORIGINAL) */
+        .opcao-pagamento { border: none; border-radius: 0; padding: 10px 0; margin-bottom: 10px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+        .opcao-pagamento:hover { border-color: transparent; background-color: transparent; }
         .box-pix { display: none; background: #f9f9f9; padding: 15px; border-radius: 8px; text-align: center; margin-top: 10px; border: 1px dashed #ccc; }
         .chave-pix { font-family: monospace; background: #eee; padding: 10px; border-radius: 5px; word-break: break-all; margin: 10px 0; font-size: 0.9rem; }
         .btn-copiar { background: #555; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
@@ -90,7 +94,7 @@
         @media (max-width: 768px) {
             .btn-whatsapp { max-width: 100%; font-size: 1rem; padding: 15px 10px;}
             .linha-total span:last-child { font-size: 1.5rem; }
-            .grid-2, .linha-endereco { grid-template-columns: 1fr; }
+            .grid-2 { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -98,7 +102,6 @@
 
     <header>
         <a href="index.html" class="logo-container">
-            <img src="logo.jpg" alt="Morning Wish" class="logo-img" onerror="this.style.display='none'">
             <span class="logo-text">Morning Wish</span>
         </a>
         <a href="index.html" class="voltar">← Cancelar</a>
@@ -106,101 +109,91 @@
 
     <main class="container-produto">
         <h1>Sua Cesta, do Seu Jeito</h1>
-        <p class="descricao">Escolha exatamente o que a pessoa mais gosta. A cesta base custa <strong>R$ 49,90</strong> (Incluso: Cesta de Vime, Decoração, Embalagem e Cartão). Adicione até 16 itens deliciosos abaixo!</p>
+        <p class="descricao">Escolha exatamente o que a pessoa mais gosta. A cesta base custa <strong>R$ 49,90</strong> (Incluso: Cesta de Vime, Embalagem e Decoração base). Adicione até 17 itens abaixo!</p>
 
         <div class="contador-flutuante">
-            Itens na Cesta: <span id="contador-tela">0</span>/16
+            Itens na Cesta: <span id="contador-tela">0</span>/17
             <p style="font-size: 0.8rem; color: #888; font-weight: normal; margin-top: 5px;">Selecione seus favoritos nas categorias abaixo.</p>
         </div>
 
-        <div class="categoria-box">
-            <div class="categoria-titulo">🥖 Pães e Salgados</div>
+        <div class="categoria-box" data-grupo="1" data-max="2">
+            <div class="categoria-titulo">🧃 Bebidas Geladas</div>
+            <span class="categoria-limite">Escolha até 2 itens desta categoria.</span>
             <div class="grid-itens">
-                <label class="item-label"><input type="checkbox" class="check-item" value="8.00" data-nome="Pão Francês (2 un)"> <div class="item-info"><span>Pão Francês (2 un)</span><span class="item-preco">+ R$ 8,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="8.00" data-nome="Suco de laranja"> <div class="item-info"><span>Suco de laranja</span><span class="item-preco">+ R$ 8,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="8.00" data-nome="Suco de uva"> <div class="item-info"><span>Suco de uva</span><span class="item-preco">+ R$ 8,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="6.00" data-nome="Chá gelado"> <div class="item-info"><span>Chá gelado</span><span class="item-preco">+ R$ 6,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="7.00" data-nome="Chocomilk"> <div class="item-info"><span>Chocomilk</span><span class="item-preco">+ R$ 7,00</span></div></label>
+            </div>
+        </div>
+
+        <div class="categoria-box" data-grupo="2" data-max="2">
+            <div class="categoria-titulo">🍯 Cremes & Geleias</div>
+            <span class="categoria-limite">Escolha até 2 itens desta categoria.</span>
+            <div class="grid-itens">
+                <label class="item-label"><input type="checkbox" class="check-item" value="5.00" data-nome="Requeijão"> <div class="item-info"><span>Requeijão</span><span class="item-preco">+ R$ 5,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="6.00" data-nome="Doce de leite"> <div class="item-info"><span>Doce de leite</span><span class="item-preco">+ R$ 6,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="8.00" data-nome="Geleia Frutas vermelhas"> <div class="item-info"><span>Geleia F. Vermelhas</span><span class="item-preco">+ R$ 8,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="8.00" data-nome="Geleia de abacaxi"> <div class="item-info"><span>Geleia de abacaxi</span><span class="item-preco">+ R$ 8,00</span></div></label>
+            </div>
+        </div>
+
+        <div class="categoria-box" data-grupo="3" data-max="4">
+            <div class="categoria-titulo">🥐 Essenciais da Manhã (Pães e Frutas)</div>
+            <span class="categoria-limite">Escolha até 4 itens desta categoria.</span>
+            <div class="grid-itens">
+                <label class="item-label"><input type="checkbox" class="check-item" value="10.00" data-nome="Pão Australiano"> <div class="item-info"><span>Pão Australiano</span><span class="item-preco">+ R$ 10,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="12.00" data-nome="Waffle (2 un)"> <div class="item-info"><span>Waffle (2 un)</span><span class="item-preco">+ R$ 12,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="10.00" data-nome="Pão de queijo"> <div class="item-info"><span>Pão de queijo</span><span class="item-preco">+ R$ 10,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="8.00" data-nome="Frutas"> <div class="item-info"><span>Frutas (Mix)</span><span class="item-preco">+ R$ 8,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="5.00" data-nome="Marshmallow"> <div class="item-info"><span>Marshmallow</span><span class="item-preco">+ R$ 5,00</span></div></label>
                 <label class="item-label"><input type="checkbox" class="check-item" value="12.00" data-nome="Croissant"> <div class="item-info"><span>Croissant</span><span class="item-preco">+ R$ 12,00</span></div></label>
-                <label class="item-label"><input type="checkbox" class="check-item" value="15.00" data-nome="Pão de Queijo (5 un)"> <div class="item-info"><span>Pão de Queijo (5)</span><span class="item-preco">+ R$ 15,00</span></div></label>
-                <label class="item-label"><input type="checkbox" class="check-item" value="10.00" data-nome="Torradas Finas"> <div class="item-info"><span>Torradas Finas</span><span class="item-preco">+ R$ 10,00</span></div></label>
             </div>
         </div>
 
-        <div class="categoria-box">
-            <div class="categoria-titulo">☕ Bebidas</div>
+        <div class="categoria-box" data-grupo="4" data-max="2">
+            <div class="categoria-titulo">🍪 Quitutes & Biscoitos</div>
+            <span class="categoria-limite">Escolha até 2 itens desta categoria.</span>
             <div class="grid-itens">
-                <label class="item-label"><input type="checkbox" class="check-item" value="12.00" data-nome="Suco de Laranja (500ml)"> <div class="item-info"><span>Suco Laranja</span><span class="item-preco">+ R$ 12,00</span></div></label>
-                <label class="item-label"><input type="checkbox" class="check-item" value="12.00" data-nome="Suco de Uva (500ml)"> <div class="item-info"><span>Suco Uva</span><span class="item-preco">+ R$ 12,00</span></div></label>
-                <label class="item-label"><input type="checkbox" class="check-item" value="8.00" data-nome="Café Solúvel Premium"> <div class="item-info"><span>Café Premium</span><span class="item-preco">+ R$ 8,00</span></div></label>
-                <label class="item-label"><input type="checkbox" class="check-item" value="6.00" data-nome="Achocolatado/Cappuccino"> <div class="item-info"><span>Cappuccino</span><span class="item-preco">+ R$ 6,00</span></div></label>
-                <label class="item-label"><input type="checkbox" class="check-item" value="5.00" data-nome="Chá Especial"> <div class="item-info"><span>Chá Especial</span><span class="item-preco">+ R$ 5,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="8.00" data-nome="Cookies"> <div class="item-info"><span>Cookies</span><span class="item-preco">+ R$ 8,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="6.00" data-nome="Torradinhas"> <div class="item-info"><span>Torradinhas</span><span class="item-preco">+ R$ 6,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="7.00" data-nome="Biscoitos Amanteigados"> <div class="item-info"><span>B. Amanteigados</span><span class="item-preco">+ R$ 7,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="5.00" data-nome="Biscoitos de Polvilho"> <div class="item-info"><span>B. de Polvilho</span><span class="item-preco">+ R$ 5,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="6.00" data-nome="Goiabinhas"> <div class="item-info"><span>Goiabinhas</span><span class="item-preco">+ R$ 6,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="12.00" data-nome="Bolo Laranja (1 un)"> <div class="item-info"><span>Bolo Laranja</span><span class="item-preco">+ R$ 12,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="12.00" data-nome="Bolo Fuba (1 un)"> <div class="item-info"><span>Bolo Fubá</span><span class="item-preco">+ R$ 12,00</span></div></label>
             </div>
         </div>
 
-        <div class="categoria-box">
-            <div class="categoria-titulo">🍎 Frutas Frescas</div>
+        <div class="categoria-box" data-grupo="5" data-max="1">
+            <div class="categoria-titulo">☕ Bebidas Quentes (Solúveis)</div>
+            <span class="categoria-limite">Escolha até 1 item desta categoria.</span>
             <div class="grid-itens">
-                <label class="item-label"><input type="checkbox" class="check-item" value="8.00" data-nome="Maçã"> <div class="item-info"><span>Maçã</span><span class="item-preco">+ R$ 8,00</span></div></label>
-                <label class="item-label"><input type="checkbox" class="check-item" value="10.00" data-nome="Cacho de Uva"> <div class="item-info"><span>Cacho de Uva</span><span class="item-preco">+ R$ 10,00</span></div></label>
-                <label class="item-label"><input type="checkbox" class="check-item" value="15.00" data-nome="Morangos"> <div class="item-info"><span>Morangos</span><span class="item-preco">+ R$ 15,00</span></div></label>
-                <label class="item-label"><input type="checkbox" class="check-item" value="7.00" data-nome="Mamão"> <div class="item-info"><span>Mamão</span><span class="item-preco">+ R$ 7,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="6.00" data-nome="Cappuccino"> <div class="item-info"><span>Cappuccino</span><span class="item-preco">+ R$ 6,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="6.00" data-nome="Café 100% Arabica"> <div class="item-info"><span>Café 100% Arabica</span><span class="item-preco">+ R$ 6,00</span></div></label>
             </div>
         </div>
 
-        <div class="categoria-box">
-            <div class="categoria-titulo">🥞 Delícias (Doces e Frios)</div>
+        <div class="categoria-box" data-grupo="6" data-max="6" style="border-left-color: #ff6b6b; background-color: #fff9f9;">
+            <div class="categoria-titulo" style="color: #ff6b6b;">🎈 Decorações & Mimos</div>
+            <span class="categoria-limite">Escolha até 6 itens desta categoria.</span>
             <div class="grid-itens">
-                <label class="item-label"><input type="checkbox" class="check-item" value="18.00" data-nome="Porção de Frios (Queijo/Presunto)"> <div class="item-info"><span>Porção de Frios</span><span class="item-preco">+ R$ 18,00</span></div></label>
-                <label class="item-label"><input type="checkbox" class="check-item" value="14.00" data-nome="Bolo Caseiro"> <div class="item-info"><span>Bolo Caseiro</span><span class="item-preco">+ R$ 14,00</span></div></label>
-                <label class="item-label"><input type="checkbox" class="check-item" value="12.00" data-nome="Waffle com Mel"> <div class="item-info"><span>Waffle c/ Mel</span><span class="item-preco">+ R$ 12,00</span></div></label>
-                <label class="item-label"><input type="checkbox" class="check-item" value="15.00" data-nome="Nutella (140g)"> <div class="item-info"><span>Nutella (140g)</span><span class="item-preco">+ R$ 15,00</span></div></label>
-                <label class="item-label"><input type="checkbox" class="check-item" value="8.00" data-nome="Geleia Artesanal"> <div class="item-info"><span>Geleia</span><span class="item-preco">+ R$ 8,00</span></div></label>
-            </div>
-        </div>
+                <label class="item-label"><input type="checkbox" class="check-item" value="5.00" data-nome="Foto impressa"> <div class="item-info"><span>Foto impressa</span><span class="item-preco">+ R$ 5,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="20.00" data-nome="Luz de Led"> <div class="item-info"><span>Luz de Led</span><span class="item-preco">+ R$ 20,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="15.00" data-nome="Balão simples"> <div class="item-info"><span>Balão simples</span><span class="item-preco">+ R$ 15,00</span></div></label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="18.00" data-nome="Suculenta"> <div class="item-info"><span>Suculenta</span><span class="item-preco">+ R$ 18,00</span></div></label>
 
-        <div class="categoria-box" style="border-left-color: #ff6b6b; background-color: #fff9f9;">
-            <div class="categoria-titulo" style="color: #ff6b6b;">🎈 Mimos e Decoração (Extras)</div>
-            <p style="font-size: 0.9rem; color: #666; margin-top: -10px; margin-bottom: 15px;">Pequenos detalhes que fazem a diferença e emocionam!</p>
-            <div class="grid-itens">
-                
-                <label class="item-label"><input type="checkbox" class="check-item" value="15.00" data-nome="Balão Coração Metálico"> <div class="item-info"><span>Balão Coração Metálico</span><span class="item-preco">+ R$ 15,00</span></div></label>
-                <label class="item-label"><input type="checkbox" class="check-item" value="25.00" data-nome="Caneca Morning Wish"> <div class="item-info"><span>Caneca Morning Wish</span><span class="item-preco">+ R$ 25,00</span></div></label>
-                <label class="item-label"><input type="checkbox" class="check-item" value="18.00" data-nome="Mini Suculenta/Flor"> <div class="item-info"><span>Mini Suculenta / Flor</span><span class="item-preco">+ R$ 18,00</span></div></label>
-
-                <label class="item-label">
-                    <input type="checkbox" class="check-item" id="check-foto" value="5.00" data-nome="Foto Polaróide"> 
-                    <div class="item-info">
-                        <span>Foto Polaróide</span>
-                        <span class="item-dica">Requer 36h de antecedência!</span>
-                        <span class="item-preco">+ R$ 5,00</span>
-                    </div>
-                </label>
-
-                <label class="item-label">
-                    <input type="checkbox" class="check-item" value="0.00" data-nome="Cartão à Mão" id="check-carta-mao" onchange="toggleMensagem('area-texto-carta-mao', this)"> 
-                    <div class="item-info">
-                        <span>Cartão Escrito à Mão</span>
-                        <span class="item-dica">Nós escrevemos por você.</span>
-                        <span class="item-preco" style="color: #D88245;">Grátis</span>
-                    </div>
-                </label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="0.00" data-nome="Cartão escrito a mão" id="check-carta-mao" onchange="toggleMensagem('area-texto-carta-mao', this)"> <div class="item-info"><span>Cartão à mão</span><span class="item-preco" style="color:var(--cor-destaque)">Grátis</span></div></label>
                 <div id="area-texto-carta-mao" class="area-mensagem">
-                    <p style="font-size: 0.85rem; color: #666; margin-bottom: 5px; font-weight: bold;">Escreva sua mensagem (Manuscrita):</p>
-                    <textarea id="mensagem-carta-mao" class="msg-box" maxlength="300" placeholder="Ex: Bom dia meu amor! Que o seu dia seja tão doce quanto esta cesta. Te amo!" oninput="contarLetras(this, 'contador-letras-mao')"></textarea>
-                    <div style="text-align: right; font-size: 0.8rem; color: #666; margin-top: 2px;"><span id="contador-letras-mao">0</span>/300</div>
+                    <p style="font-weight: bold; margin-bottom: 5px;">Sua mensagem (Manuscrita):</p>
+                    <textarea id="mensagem-carta-mao" class="msg-box" placeholder="Escreva seu recado..."></textarea>
                 </div>
 
-                <label class="item-label">
-                    <input type="checkbox" class="check-item" value="3.00" data-nome="Cartão Impresso" id="check-carta-impressa" onchange="toggleMensagem('area-texto-carta-impressa', this)"> 
-                    <div class="item-info">
-                        <span>Cartão Mensagem Impresso</span>
-                        <span class="item-dica">Requer 36h de antecedência!</span>
-                        <span class="item-preco">+ R$ 3,00</span>
-                    </div>
-                </label>
+                <label class="item-label"><input type="checkbox" class="check-item" value="3.00" data-nome="Cartão impresso" id="check-carta-impressa" onchange="toggleMensagem('area-texto-carta-impressa', this)"> <div class="item-info"><span>Cartão impresso</span><span class="item-preco">+ R$ 3,00</span></div></label>
                 <div id="area-texto-carta-impressa" class="area-mensagem">
-                    <p style="font-size: 0.85rem; color: #666; margin-bottom: 5px; font-weight: bold;">Escreva sua mensagem (Impressa):</p>
-                    <textarea id="mensagem-carta-impressa" class="msg-box" maxlength="300" placeholder="Mensagem para o cartão impresso..." oninput="contarLetras(this, 'contador-letras-impressa')"></textarea>
-                    <div style="text-align: right; font-size: 0.8rem; color: #666; margin-top: 2px;"><span id="contador-letras-impressa">0</span>/300</div>
+                    <p style="font-weight: bold; margin-bottom: 5px;">Sua mensagem impressa:</p>
+                    <textarea id="mensagem-carta-impressa" class="msg-box" placeholder="Escreva seu recado..."></textarea>
                 </div>
-
             </div>
         </div>
 
@@ -272,53 +265,25 @@
 
     <div id="modal-pedido" class="modal-overlay">
         <div class="modal-content" id="etapa-resumo">
-            <div class="modal-titulo">📝 Resumo da Sua Cesta</div>
-            <div id="area-resumo-texto" class="resumo-lista"></div>
+            <div class="modal-titulo">📝 Resumo da Cesta</div>
+            <div id="area-resumo-texto" style="color: #555; line-height: 1.8;"></div>
             <div class="botoes-modal">
-                <button class="btn-voltar-modal" onclick="fecharModal()">← Mudar Itens</button>
-                <button class="btn-confirmar-modal" onclick="irParaPagamento()">Ir para Pagamento 💳</button>
+                <button class="btn-voltar-modal" onclick="document.getElementById('modal-pedido').style.display='none'">← Voltar</button>
+                <button class="btn-confirmar-modal" onclick="document.getElementById('etapa-resumo').style.display='none'; document.getElementById('etapa-pagamento').style.display='block'">Ir para Pagamento 💳</button>
             </div>
         </div>
-
         <div class="modal-content" id="etapa-pagamento" style="display: none;">
             <div class="modal-titulo">🤑 Pagamento</div>
-            <p style="text-align: center; margin-bottom: 15px; color: #666;">Como deseja pagar?</p>
-            
-            <label class="opcao-pagamento" onclick="mostrarInfoPagamento('pix')">
-                <input type="radio" name="formaPagamento" value="Pix" checked>
-                <span>💠 <b>PIX</b> (Chave Aleatória/CPF)</span>
-            </label>
-            <div id="info-pix" class="box-pix" style="display: block;">
-                <p style="font-size: 0.9rem;">Copie a chave e pague no seu banco:</p>
-                <div class="chave-pix" id="chave-pix-texto">41 988506306</div> <button class="btn-copiar" onclick="copiarChavePix()">Copiar Chave</button>
-            </div>
-
-            <label class="opcao-pagamento" onclick="mostrarInfoPagamento('picpay')">
-                <input type="radio" name="formaPagamento" value="PicPay">
-                <span>💚 <b>PicPay</b> (Cartão de Crédito / Saldo)</span>
-            </label>
-            <div id="info-picpay" class="box-pix" style="display: none;">
-                <p>Abriremos o <b>PicPay</b> com o valor exato. Aceita Cartão.</p>
-            </div>
-
-            <label class="opcao-pagamento" onclick="mostrarInfoPagamento('stone')">
-                <input type="radio" name="formaPagamento" value="Cartão (Stone)">
-                <span>💳 <b>Cartão Crédito/Débito</b> (Stone)</span>
-            </label>
-            <div id="info-stone" class="box-pix" style="display: none;">
-                <p style="font-size: 0.9rem;">Mandaremos o link pelo WhatsApp ou passamos na maquininha na entrega.</p>
-            </div>
-
+            <label class="opcao-pagamento" onclick="mostrarInfoPagamento('pix')"><input type="radio" name="formaPagamento" value="Pix" checked> <span>💠 <b>PIX</b></span></label>
+            <div id="info-pix" class="box-pix" style="display: block;"><div class="chave-pix" id="chave-pix-texto">41 988506306</div><button class="btn-copiar" onclick="navigator.clipboard.writeText('41 988506306').then(()=>alert('Copiada!'))">Copiar Chave</button></div>
+            <label class="opcao-pagamento" onclick="mostrarInfoPagamento('picpay')"><input type="radio" name="formaPagamento" value="PicPay"> <span>💚 <b>PicPay</b></span></label>
+            <div id="info-picpay" class="box-pix" style="display: none;"><p>Abriremos o PicPay.</p></div>
+            <label class="opcao-pagamento" onclick="mostrarInfoPagamento('stone')"><input type="radio" name="formaPagamento" value="Cartão (Stone)"> <span>💳 <b>Cartão Crédito/Débito</b> (Stone)</span></label>
+            <div id="info-stone" class="box-pix" style="display: none;"><p>Mandaremos o link pelo WhatsApp ou passamos na maquininha na entrega.</p></div>
             <div class="botoes-modal">
-                <button class="btn-voltar-modal" onclick="voltarParaResumo()">← Voltar</button>
+                <button class="btn-voltar-modal" onclick="document.getElementById('etapa-pagamento').style.display='none'; document.getElementById('etapa-resumo').style.display='block'">← Resumo</button>
                 <button class="btn-confirmar-modal" onclick="finalizarCompraReal()">Finalizar Pedido ✅</button>
             </div>
-        </div>
-
-        <div class="modal-content" id="etapa-sucesso" style="display: none; text-align: center;">
-            <div class="modal-titulo">🎉 Cesta Criada!</div>
-            <p style="font-size: 1.1rem; color: #555; margin: 20px 0;">Sua cesta personalizada foi salva!<br>Aguarde o WhatsApp abrir.</p>
-            <button class="btn-inicio" onclick="window.location.href='index.html'">Voltar para o Início</button>
         </div>
     </div>
 
@@ -331,9 +296,9 @@
         let valorFrete = 0;
         let taxaUrgencia = 0;
         let bairroEncontrado = "";
-        const MAX_ITENS = 16;
+        const MAX_ITENS_TOTAL = 17;
 
-        // --- SISTEMA DE REGRAS DE DATA/HORA (NOVO) ---
+        // --- SISTEMA DE REGRAS DE DATA/HORA ---
         window.onload = function() {
             const inputData = document.getElementById('data-entrega');
             const agora = new Date();
@@ -384,34 +349,34 @@
             } else {
                 area.style.display = 'none';
                 area.querySelector('textarea').value = '';
-                area.querySelector('span[id^="contador"]').innerText = '0';
             }
-        }
-
-        function contarLetras(input, idContador) {
-            var contador = document.getElementById(idContador);
-            var qtd = input.value.length;
-            contador.innerText = qtd;
-            if (qtd === 300) { contador.style.color = "red"; contador.style.fontWeight = "bold"; } 
-            else { contador.style.color = "#666"; contador.style.fontWeight = "normal"; }
         }
 
         // Lógica de Limite e Preço
         document.querySelectorAll('.check-item').forEach(checkbox => {
             checkbox.addEventListener('change', function() {
-                let selecionados = document.querySelectorAll('.check-item:checked');
-                let qtd = selecionados.length;
-                
-                document.getElementById('contador-tela').innerText = qtd;
+                let totalSelecionados = document.querySelectorAll('.check-item:checked').length;
+                document.getElementById('contador-tela').innerText = totalSelecionados;
 
                 if(this.checked) this.closest('.item-label').classList.add('selecionado');
                 else this.closest('.item-label').classList.remove('selecionado');
 
-                if (qtd >= MAX_ITENS) {
-                    document.querySelectorAll('.check-item:not(:checked)').forEach(cb => cb.disabled = true);
-                } else {
-                    document.querySelectorAll('.check-item:not(:checked)').forEach(cb => cb.disabled = false);
-                }
+                // Percorre todas as caixas de categoria para checar limites
+                document.querySelectorAll('.categoria-box').forEach(box => {
+                    let maxPermitido = parseInt(box.getAttribute('data-max'));
+                    let selecionadosAqui = box.querySelectorAll('.check-item:checked').length;
+                    
+                    // Bloqueia os não-marcados se bater o limite do grupo OU o limite global
+                    box.querySelectorAll('.check-item:not(:checked)').forEach(cb => {
+                        if (selecionadosAqui >= maxPermitido || totalSelecionados >= MAX_ITENS_TOTAL) {
+                            cb.disabled = true;
+                            cb.closest('.item-label').classList.add('desabilitado');
+                        } else {
+                            cb.disabled = false;
+                            cb.closest('.item-label').classList.remove('desabilitado');
+                        }
+                    });
+                });
 
                 atualizarTotalBase();
             });
@@ -510,15 +475,17 @@
             document.getElementById('etapa-pagamento').style.display = 'none';
         }
 
-        function fecharModal() { document.getElementById('modal-pedido').style.display = 'none'; }
-        function irParaPagamento() { document.getElementById('etapa-resumo').style.display = 'none'; document.getElementById('etapa-pagamento').style.display = 'block'; }
-        function voltarParaResumo() { document.getElementById('etapa-pagamento').style.display = 'none'; document.getElementById('etapa-resumo').style.display = 'block'; }
-        
-        function mostrarInfoPagamento(t) { document.getElementById('info-pix').style.display = 'none'; document.getElementById('info-picpay').style.display = 'none'; document.getElementById('info-stone').style.display = 'none'; document.getElementById('info-' + t).style.display = 'block'; }
+        function mostrarInfoPagamento(t) { 
+            document.getElementById('info-pix').style.display = 'none'; 
+            document.getElementById('info-picpay').style.display = 'none'; 
+            document.getElementById('info-stone').style.display = 'none'; 
+            document.getElementById('info-' + t).style.display = 'block'; 
+        }
+
         function copiarChavePix() { navigator.clipboard.writeText(document.getElementById('chave-pix-texto').innerText).then(()=>alert("Copiada!")); }
 
-       // --- A MÁGICA DO WHATSAPP (CORRIGIDA) ---
-        function finalizarCompraReal() {
+       // --- A MÁGICA DO WHATSAPP (AGORA COM OS DADOS COMPLETOS E SEM TRAVAR) ---
+       function finalizarCompraReal() {
             try {
                 document.querySelector('#etapa-pagamento .btn-confirmar-modal').innerText = "Enviando...";
                 
@@ -553,9 +520,9 @@
                     "Data": new Date().toLocaleString(),
                     "Nome": compNome,
                     "Telefone": document.getElementById('comprador-zap') ? document.getElementById('comprador-zap').value : "",
-                    "Email": document.getElementById('comprador-email') ? document.getElementById('comprador-email').value : "",
-                    "Cesta": "Personalizada", // Mesma planilha, só muda o tipo
-                    "Adicionais": itens.join(', ') || "Nenhum item",
+                    "Email": "",
+                    "Cesta": "Personalizada", 
+                    "Adicionais": itens.join(', ') || "Nenhum",
                     "Bilhete": bilheteFinal,
                     "Recebedor": recNome,
                     "Total": totalStr,
@@ -566,14 +533,13 @@
                 fetch(URL_GOOGLE_SHEETS, { method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(dados) })
                 .catch(e => console.log("Planilha background falhou."));
 
-                let zap = `👋 Pedido de *CESTA PERSONALIZADA*\n\n📦 *ITENS:* \n- ${itens.join('\n- ')}\n`;
-                if (bilheteFinal !== "-") zap += `\n💌 *MENSAGEM DO CARTÃO:*\n${bilheteFinal}\n`;
+                let zap = `👋 Pedido de *CESTA PERSONALIZADA*\n\n📦 *ITENS (${itens.length}/17):* \n- ${itens.join('\n- ')}\n`;
+                if (bilheteFinal !== "-") zap += `\n💌 *CARTÃO:*\n${bilheteFinal}\n`;
                 if (typeof taxaUrgencia !== 'undefined' && taxaUrgencia > 0) zap += `\n🚨 *INCLUI TAXA DE URGÊNCIA*\n`;
-                zap += `\n💰 *TOTAL:* ${totalStr} (${formPg})\n\n👤 De: ${compNome}\n🎁 Para: ${recNome}\n🚚 ${dt} às ${hr}\n📍 ${rua}, ${num}\n⚠️ Obs: ${document.getElementById('end-obs') ? document.getElementById('end-obs').value : ""}`;
+                zap += `\n💰 *TOTAL:* ${totalStr} (${formPg})\n\n👤 De: ${compNome}\n🎁 Para: ${dados.Recebedor}\n🚚 ${dt} às ${hr}\n📍 ${rua}, ${num}\n⚠️ Obs: ${document.getElementById('end-obs') ? document.getElementById('end-obs').value : ""}`;
 
                 let linkZap = `https://wa.me/${SEU_NUMERO_ZAP}?text=${encodeURIComponent(zap)}`;
 
-                // Atraso de segurança para abrir o Zap sem quebrar a aba
                 setTimeout(() => {
                     if(formPg === 'PicPay') {
                         let valorLimpo = totalStr.replace("R$","").replace(/\./g,"").replace(",",".").trim();
