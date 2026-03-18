@@ -435,27 +435,30 @@
 
         // --- SISTEMA DE REGRAS DE DATA/HORA E URGÊNCIA ---
        // --- SISTEMA DE REGRAS DE DATA/HORA E URGÊNCIA ---
+       // --- FUNÇÃO ANTI-BUG DO SAFARI/CELULAR ---
+        function formatarDataLocal(dataObj) {
+            let ano = dataObj.getFullYear();
+            let mes = String(dataObj.getMonth() + 1).padStart(2, '0');
+            let dia = String(dataObj.getDate()).padStart(2, '0');
+            return `${ano}-${mes}-${dia}`;
+        }
+
+        // --- SISTEMA DE REGRAS DE DATA/HORA E URGÊNCIA ---
         window.onload = function() {
             const inputData = document.getElementById('data-entrega');
             const agora = new Date();
             const horaAtual = agora.getHours();
             
-            // Cria o dia de amanhã e depois de amanhã
             let amanha = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + 1);
-            let strAmanha = amanha.toISOString().split('T')[0];
-
             let depoisDeAmanha = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + 2);
-            let strDepois = depoisDeAmanha.toISOString().split('T')[0];
 
             const boxUrgencia = document.getElementById('box-urgencia');
 
             if (horaAtual >= 18) {
-                // Passou das 18h: o calendário só deixa clicar em depois de amanhã (a não ser que pague urgência)
-                inputData.min = strDepois; 
+                inputData.min = formatarDataLocal(depoisDeAmanha); 
                 if (boxUrgencia) boxUrgencia.style.display = 'flex';
             } else {
-                // Antes das 18h: o calendário deixa clicar amanhã
-                inputData.min = strAmanha; 
+                inputData.min = formatarDataLocal(amanha); 
                 if (boxUrgencia) boxUrgencia.style.display = 'none';
             }
         };
@@ -468,12 +471,12 @@
 
             if (checkbox.checked) {
                 taxaUrgencia = 20.00;
-                inputData.min = amanha.toISOString().split('T')[0]; // Libera amanhã no calendário
+                inputData.min = formatarDataLocal(amanha);
             } else {
                 taxaUrgencia = 0;
-                inputData.min = depois.toISOString().split('T')[0]; // Volta a bloquear amanhã
-                if(inputData.value === amanha.toISOString().split('T')[0]) {
-                    inputData.value = ""; // Limpa o campo se ele desmarcar a urgência
+                inputData.min = formatarDataLocal(depois); 
+                if(inputData.value === formatarDataLocal(amanha)) {
+                    inputData.value = ""; 
                 }
             }
             if (typeof atualizarTotal === "function") atualizarTotal();
@@ -494,7 +497,7 @@
             
             if (!compNome) { alert("Preencha seu nome."); return; }
             if (!recNome) { alert("Preencha o nome de quem vai receber."); return; }
-            if (valorFrete === 0) { alert("Calcule o frete."); return; }
+            if (typeof valorFrete !== 'undefined' && valorFrete === 0) { alert("Calcule o frete."); return; }
             if (!numero) { alert("Preencha o número da casa."); return; }
 
             const dataEntregaStr = document.getElementById('data-entrega').value;
@@ -517,7 +520,7 @@
             let dataSelecionada = new Date(partesData[0], partesData[1] - 1, partesData[2]);
 
             // TRAVA 1: Impede pedido para o mesmo dia ou no passado (burlar o calendário)
-            if (dataSelecionada <= dataHoje) {
+            if (dataSelecionada.getTime() <= dataHoje.getTime()) {
                 alert("📅 Não fazemos entregas no mesmo dia. A entrega deve ser agendada no mínimo para amanhã.");
                 return;
             }
@@ -544,9 +547,9 @@
                 let dataEscolhidaObj = new Date(partesData[0], partesData[1] - 1, partesData[2], partesHora[0], partesHora[1]);
                 
                 let dataLimite36h = new Date(agora.getTime());
-                dataLimite36h.setHours(dataLimite36h.getHours() + 36); // Adiciona 36h no relógio exato de agora
+                dataLimite36h.setHours(dataLimite36h.getHours() + 36); 
 
-                if (dataEscolhidaObj < dataLimite36h) {
+                if (dataEscolhidaObj.getTime() < dataLimite36h.getTime()) {
                     alert("⚠️ ALERTA DE PRODUÇÃO!\n\nVocê selecionou 'Foto' ou 'Cartão Impresso'.\nEstes itens exigem um mínimo de 36 HORAS de antecedência para produção.\n\nPor favor, altere a data/hora para daqui a 3 dias ou remova estes itens da cesta.");
                     return; 
                 }
@@ -557,11 +560,8 @@
             const totalStr = document.getElementById('valor-total') ? document.getElementById('valor-total').innerText : document.getElementById('valor-total-exibicao').innerText;
             const entregaFormatada = dataEntregaStr.split('-').reverse().join('/');
             
-            let htmlResumo = `
-                <p><strong>Cesta:</strong> ${nomeCesta}</p>
-            `;
+            let htmlResumo = `<p><strong>Cesta:</strong> ${nomeCesta}</p>`;
             
-            // Adiciona a lista de itens caso seja a personalizada
             if (document.querySelectorAll('.check-item:checked').length > 0) {
                 let lista = [];
                 document.querySelectorAll('.check-item:checked').forEach(box => lista.push(box.getAttribute('data-nome')));
