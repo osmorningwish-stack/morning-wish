@@ -178,7 +178,7 @@
             <div class="categoria-titulo" style="color: #ff6b6b;">🎈 Decorações & Mimos</div>
             <span class="categoria-limite">Escolha até 6 itens desta categoria.</span>
             <div class="grid-itens">
-                <label class="item-label"><input type="checkbox" class="check-item" value="5.00" data-nome="Foto impressa"> <div class="item-info"><span>Foto impressa</span><span class="item-preco">+ R$ 5,00</span></div></label>
+                <label class="item-label"><input type="checkbox" id="check-foto" class="check-item" value="5.00" data-nome="Foto impressa"> <div class="item-info"><span>Foto impressa</span><span class="item-preco">+ R$ 5,00</span></div></label>
                 <label class="item-label"><input type="checkbox" class="check-item" value="20.00" data-nome="Luz de Led"> <div class="item-info"><span>Luz de Led</span><span class="item-preco">+ R$ 20,00</span></div></label>
                 <label class="item-label"><input type="checkbox" class="check-item" value="15.00" data-nome="Balão simples"> <div class="item-info"><span>Balão simples</span><span class="item-preco">+ R$ 15,00</span></div></label>
                 <label class="item-label"><input type="checkbox" class="check-item" value="18.00" data-nome="Suculenta"> <div class="item-info"><span>Suculenta</span><span class="item-preco">+ R$ 18,00</span></div></label>
@@ -298,46 +298,153 @@
         let bairroEncontrado = "";
         const MAX_ITENS_TOTAL = 17;
 
-        // --- SISTEMA DE REGRAS DE DATA/HORA ---
+       // --- INICIALIZAÇÃO DA PÁGINA ---
+       // --- SISTEMA DE REGRAS DE DATA/HORA E URGÊNCIA ---
         window.onload = function() {
             const inputData = document.getElementById('data-entrega');
             const agora = new Date();
             const horaAtual = agora.getHours();
             
-            let amanha = new Date(agora); amanha.setDate(agora.getDate() + 1);
+            // Cria o dia de amanhã e depois de amanhã
+            let amanha = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + 1);
             let strAmanha = amanha.toISOString().split('T')[0];
 
-            let depoisDeAmanha = new Date(agora); depoisDeAmanha.setDate(agora.getDate() + 2);
+            let depoisDeAmanha = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + 2);
             let strDepois = depoisDeAmanha.toISOString().split('T')[0];
 
             const boxUrgencia = document.getElementById('box-urgencia');
 
             if (horaAtual >= 18) {
+                // Passou das 18h: o calendário só deixa clicar em depois de amanhã (a não ser que pague urgência)
                 inputData.min = strDepois; 
-                boxUrgencia.style.display = 'flex';
+                if (boxUrgencia) boxUrgencia.style.display = 'flex';
             } else {
+                // Antes das 18h: o calendário deixa clicar amanhã
                 inputData.min = strAmanha; 
-                boxUrgencia.style.display = 'none';
+                if (boxUrgencia) boxUrgencia.style.display = 'none';
             }
         };
 
         function toggleUrgencia(checkbox) {
             const inputData = document.getElementById('data-entrega');
             let agora = new Date();
-            let amanha = new Date(agora); amanha.setDate(agora.getDate() + 1);
-            let depois = new Date(agora); depois.setDate(agora.getDate() + 2);
+            let amanha = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + 1);
+            let depois = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + 2);
 
             if (checkbox.checked) {
                 taxaUrgencia = 20.00;
-                inputData.min = amanha.toISOString().split('T')[0];
+                inputData.min = amanha.toISOString().split('T')[0]; // Libera amanhã no calendário
             } else {
                 taxaUrgencia = 0;
-                inputData.min = depois.toISOString().split('T')[0]; 
+                inputData.min = depois.toISOString().split('T')[0]; // Volta a bloquear amanhã
                 if(inputData.value === amanha.toISOString().split('T')[0]) {
-                    inputData.value = ""; 
+                    inputData.value = ""; // Limpa o campo se ele desmarcar a urgência
                 }
             }
-            atualizarTotalBase();
+            if (typeof atualizarTotal === "function") atualizarTotal();
+            if (typeof atualizarTotalBase === "function") atualizarTotalBase();
+        }
+
+        // --- ABRIR RESUMO E VALIDAÇÕES RÍGIDAS ---
+        function abrirResumo() {
+            // Se estiver na personalizada, checa a quantidade de itens
+            if (document.querySelectorAll('.check-item').length > 0) {
+                const qtdItens = document.querySelectorAll('.check-item:checked').length;
+                if (qtdItens === 0) { alert("Escolha pelo menos 1 item para sua cesta!"); return; }
+            }
+
+            const compNome = document.getElementById('comprador-nome').value;
+            const recNome = document.getElementById('recebedor-nome').value;
+            const numero = document.getElementById('end-numero').value;
+            
+            if (!compNome) { alert("Preencha seu nome."); return; }
+            if (!recNome) { alert("Preencha o nome de quem vai receber."); return; }
+            if (valorFrete === 0) { alert("Calcule o frete."); return; }
+            if (!numero) { alert("Preencha o número da casa."); return; }
+
+            const dataEntregaStr = document.getElementById('data-entrega').value;
+            if(!dataEntregaStr) { alert("Por favor, selecione a data de entrega."); return; }
+            
+            const horaEntrega = document.getElementById('hora-entrega').value;
+            if (!horaEntrega || horaEntrega < "07:00" || horaEntrega > "18:00") { 
+                alert("⏰ Por favor, selecione um horário válido de entrega entre 07:00 e 18:00."); 
+                return; 
+            }
+
+            // --- VALIDAÇÕES MATEMÁTICAS BLINDADAS ---
+            const agora = new Date();
+            const horaAtual = agora.getHours();
+            
+            let dataHoje = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate());
+            let dataAmanha = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + 1);
+
+            let partesData = dataEntregaStr.split('-');
+            let dataSelecionada = new Date(partesData[0], partesData[1] - 1, partesData[2]);
+
+            // TRAVA 1: Impede pedido para o mesmo dia ou no passado (burlar o calendário)
+            if (dataSelecionada <= dataHoje) {
+                alert("📅 Não fazemos entregas no mesmo dia. A entrega deve ser agendada no mínimo para amanhã.");
+                return;
+            }
+
+            // TRAVA 2: Passou das 18h, tentou pedir pra amanhã e não marcou urgência
+            if (horaAtual >= 18 && dataSelecionada.getTime() === dataAmanha.getTime()) {
+                let checkUrgencia = document.getElementById('check-urgencia');
+                if (!checkUrgencia || !checkUrgencia.checked) {
+                    alert("🚨 ATENÇÃO: Já passou das 18:00!\nPara entregas no dia de amanhã, você precisa marcar a 'Taxa de Urgência'.\nMarque a caixinha vermelha de urgência ou mude a data para depois de amanhã.");
+                    return;
+                }
+            }
+
+            // TRAVA 3: Regra das 36 Horas (Foto e Cartão)
+            let temItemDemorado = false;
+            let checkFoto = document.getElementById('check-foto');
+            let checkCarta = document.getElementById('check-carta-impressa');
+            
+            if (checkFoto && checkFoto.checked) temItemDemorado = true;
+            if (checkCarta && checkCarta.checked) temItemDemorado = true;
+
+            if (temItemDemorado) {
+                let partesHora = horaEntrega.split(':');
+                let dataEscolhidaObj = new Date(partesData[0], partesData[1] - 1, partesData[2], partesHora[0], partesHora[1]);
+                
+                let dataLimite36h = new Date(agora.getTime());
+                dataLimite36h.setHours(dataLimite36h.getHours() + 36); // Adiciona 36h no relógio exato de agora
+
+                if (dataEscolhidaObj < dataLimite36h) {
+                    alert("⚠️ ALERTA DE PRODUÇÃO!\n\nVocê selecionou 'Foto' ou 'Cartão Impresso'.\nEstes itens exigem um mínimo de 36 HORAS de antecedência para produção.\n\nPor favor, altere a data/hora para daqui a 3 dias ou remova estes itens da cesta.");
+                    return; 
+                }
+            }
+
+            // --- SUCESSO: TUDO VALIDADO, MONTA O RESUMO ---
+            const nomeCesta = document.getElementById('nome-produto') ? document.getElementById('nome-produto').innerText : "Cesta Personalizada";
+            const totalStr = document.getElementById('valor-total') ? document.getElementById('valor-total').innerText : document.getElementById('valor-total-exibicao').innerText;
+            const entregaFormatada = dataEntregaStr.split('-').reverse().join('/');
+            
+            let htmlResumo = `
+                <p><strong>Cesta:</strong> ${nomeCesta}</p>
+            `;
+            
+            // Adiciona a lista de itens caso seja a personalizada
+            if (document.querySelectorAll('.check-item:checked').length > 0) {
+                let lista = [];
+                document.querySelectorAll('.check-item:checked').forEach(box => lista.push(box.getAttribute('data-nome')));
+                htmlResumo += `<p><strong>Itens:</strong> ${lista.join(', ')}</p>`;
+            }
+
+            htmlResumo += `
+                <p><strong>Para:</strong> ${recNome}</p>
+                <p><strong>Entrega:</strong> ${entregaFormatada} às ${horaEntrega}</p>
+                <p><strong>Total:</strong> <span style="color:#D88245; font-weight:bold;">${totalStr}</span></p>
+            `;
+
+            if (typeof taxaUrgencia !== 'undefined' && taxaUrgencia > 0) htmlResumo += `<p style="color:red; font-weight:bold;">Inclui Taxa de Urgência</p>`;
+
+            document.getElementById('area-resumo-texto').innerHTML = htmlResumo;
+            document.getElementById('modal-pedido').style.display = 'flex';
+            document.getElementById('etapa-resumo').style.display = 'block';
+            document.getElementById('etapa-pagamento').style.display = 'none';
         }
 
         // --- FUNÇÕES DE TEXTO DO CARTÃO ---
@@ -421,60 +528,88 @@
             }).catch(e => { msg.innerHTML = "<span class='erro'>Erro ao buscar CEP.</span>"; divDetalhes.style.display = 'none'; });
         }
 
-        // Modais e Resumo
-        function abrirResumo() {
+      function abrirResumo() {
             const qtdItens = document.querySelectorAll('.check-item:checked').length;
             if (qtdItens === 0) { alert("Escolha pelo menos 1 item para sua cesta!"); return; }
             
             const compNome = document.getElementById('comprador-nome').value;
             const recNome = document.getElementById('recebedor-nome').value;
-            const num = document.getElementById('end-numero').value;
-            if (!compNome || !recNome || valorFrete === 0 || !num) { alert("Preencha todos os dados de entrega e frete."); return; }
-
-            const horaEntrega = document.getElementById('hora-entrega').value;
-            if (!horaEntrega || horaEntrega < "07:00" || horaEntrega > "18:00") { alert("Por favor, selecione um horário válido de entrega entre 07:00 e 18:00."); return; }
+            const numero = document.getElementById('end-numero').value;
             
+            if (!compNome) { alert("Preencha seu nome."); return; }
+            if (!recNome) { alert("Preencha o nome de quem vai receber."); return; }
+            if (valorFrete === 0) { alert("Calcule o frete."); return; }
+            if (!numero) { alert("Preencha o número da casa."); return; }
+
             const dataEntregaStr = document.getElementById('data-entrega').value;
             if(!dataEntregaStr) { alert("Por favor, selecione a data de entrega."); return; }
+            
+            const horaEntrega = document.getElementById('hora-entrega').value;
+            if (!horaEntrega || horaEntrega < "07:00" || horaEntrega > "18:00") { 
+                alert("⏰ Por favor, selecione um horário válido de entrega entre 07:00 e 18:00."); 
+                return; 
+            }
 
-            // VALIDAÇÃO DA REGRA DE 36 HORAS
+            // --- VALIDAÇÕES DE DATA RIGOROSAS ---
+            const agora = new Date();
+            const horaAtual = agora.getHours();
+            
+            let dataHoje = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate());
+            let dataAmanha = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + 1);
+            let data3Dias = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + 3);
+
+            let partesData = dataEntregaStr.split('-');
+            let dataSelecionada = new Date(partesData[0], partesData[1] - 1, partesData[2]);
+
+            // 1. Trava de Data no Passado
+            if (dataSelecionada < dataHoje) {
+                alert("📅 A data de entrega não pode ser no passado. Selecione a partir de hoje.");
+                return;
+            }
+
+            // 2. Trava de Urgência
+            if (horaAtual >= 18 && dataSelecionada.getTime() === dataAmanha.getTime()) {
+                let checkUrgencia = document.getElementById('check-urgencia');
+                if (!checkUrgencia || !checkUrgencia.checked) {
+                    alert("🚨 ATENÇÃO: Já passou das 18:00!\nPara entregas no dia de amanhã, você precisa marcar a 'Taxa de Urgência'.\nMarque a caixinha de urgência ou mude a data para depois de amanhã.");
+                    return;
+                }
+            }
+
+            // 3. Trava de 3 Dias para Foto e Cartão
             let temItemDemorado = false;
             if (document.getElementById('check-foto') && document.getElementById('check-foto').checked) temItemDemorado = true;
             if (document.getElementById('check-carta-impressa') && document.getElementById('check-carta-impressa').checked) temItemDemorado = true;
 
             if (temItemDemorado) {
-                let dataEscolhidaObj = new Date(`${dataEntregaStr}T${horaEntrega}`);
-                let dataLimite36h = new Date();
-                dataLimite36h.setHours(dataLimite36h.getHours() + 36);
-
-                if (dataEscolhidaObj < dataLimite36h) {
-                    alert("⚠️ ALERTA DE PRODUÇÃO!\n\nVocê selecionou 'Foto Polaróide' ou 'Cartão Impresso'.\nEstes itens exigem um mínimo de 36 horas de antecedência.\n\nPor favor, escolha uma data/hora mais adiante ou remova esses itens para receber a cesta antes.");
+                if (dataSelecionada < data3Dias) {
+                    alert("⚠️ ALERTA DE PRODUÇÃO!\n\nVocê selecionou 'Foto Polaróide' ou 'Cartão Impresso'.\nEstes itens exigem um mínimo de 3 DIAS de antecedência.\n\nPor favor, altere a data de entrega para daqui a 3 dias ou desmarque estes itens.");
                     return; 
                 }
             }
 
+            // --- SUCESSO: Monta Resumo ---
             let lista = [];
             document.querySelectorAll('.check-item:checked').forEach(box => lista.push(box.getAttribute('data-nome')));
             
             const totalStr = document.getElementById('valor-total-exibicao').innerText;
-            const entrega = dataEntregaStr.split('-').reverse().join('/');
+            const entregaFormatada = dataEntregaStr.split('-').reverse().join('/');
             
-            let html = `
-                <p><strong>Cesta:</strong> Personalizada (${qtdItens} itens)</p>
+            let htmlResumo = `
+                <p><strong>Cesta Personalizada:</strong> ${qtdItens} itens selecionados.</p>
                 <p><strong>Itens:</strong> ${lista.join(', ')}</p>
                 <p><strong>Para:</strong> ${recNome}</p>
-                <p><strong>Entrega:</strong> ${entrega} às ${horaEntrega}</p>
+                <p><strong>Entrega:</strong> ${entregaFormatada} às ${horaEntrega}</p>
                 <p><strong>Total:</strong> <span style="color:#D88245; font-weight:bold;">${totalStr}</span></p>
             `;
-            if (taxaUrgencia > 0) html += `<p style="color:red; font-weight:bold;">Inclui Taxa de Urgência</p>`;
+            if (typeof taxaUrgencia !== 'undefined' && taxaUrgencia > 0) htmlResumo += `<p style="color:red; font-weight:bold;">Inclui Taxa de Urgência</p>`;
 
-            document.getElementById('area-resumo-texto').innerHTML = html;
+            document.getElementById('area-resumo-texto').innerHTML = htmlResumo;
             
             document.getElementById('modal-pedido').style.display = 'flex';
             document.getElementById('etapa-resumo').style.display = 'block';
             document.getElementById('etapa-pagamento').style.display = 'none';
         }
-
         function mostrarInfoPagamento(t) { 
             document.getElementById('info-pix').style.display = 'none'; 
             document.getElementById('info-picpay').style.display = 'none'; 
